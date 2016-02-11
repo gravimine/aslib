@@ -1,7 +1,7 @@
-SOURCES += $$PWD/src/anetwork.cpp \
-    $$PWD/src/atcpclient.cpp
-INCLUDEPATH += $$PWD/include
-HEADERS  += $$PWD/include/anetwork.h \
-$$PWD/include/aclientserver.h \
-    $$PWD/include/atcpclient.h \
-    $$PWD/include/atcpinhttpfunc.h
+SOURCES += $$PWD/anetwork.cpp \
+    $$PWD/atcpclient.cpp
+INCLUDEPATH += $$PWD
+HEADERS  += $$PWD/anetwork.h \
+$$PWD/aclientserver.h \
+    $$PWD/atcpclient.h \
+    $$PWD/atcpinhttpfunc.h

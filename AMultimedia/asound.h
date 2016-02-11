@@ -1,6 +1,6 @@
-/*#ifndef ASOUND_H
+#ifndef ASOUND_H
 #define ASOUND_H
-#include <QAudioOutput>
+#include <QtMultimedia/QAudioOutput>
 #include <QFile>
 #include <QString>
 
@@ -33,4 +33,4 @@ public:
 };
 }
 
-#endif // ASOUND_H*/
+#endif // ASOUND_H

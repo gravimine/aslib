@@ -1,7 +1,7 @@
-/*#include "asound.h"
+#include "asound.h"
 #include <QString>
 #include <QFile>
-#include <QSound>
+#include <QtMultimedia/QSound>
 using ACore::ASound;
 ASound::ASound()
 {
@@ -50,4 +50,3 @@ void ASound::ForDevice(QString devicename)
         if(ach.value(i).deviceName()==devicename) info=ach.value(i);
     }
 }
-*/
