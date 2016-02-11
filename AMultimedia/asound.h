@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QString>
 
-namespace ACore
+namespace AMultimedia
 {
 enum SoundAPI
 {

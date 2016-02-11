@@ -2,7 +2,8 @@
 #include <QString>
 #include <QFile>
 #include <QtMultimedia/QSound>
-using ACore::ASound;
+namespace AMultimedia
+{
 ASound::ASound()
 {
     info = QAudioDeviceInfo::defaultOutputDevice();
@@ -15,12 +16,12 @@ void ASound::SetPatch(QString file)
 {
   patch=file;
 }
-void ASound::start(ACore::SoundAPI soundapi)
+void ASound::start(SoundAPI soundapi)
 {
-    if(soundapi==ACore::classQAudioOutput){
+    if(soundapi==AMultimedia::classQAudioOutput){
     inputFile.seek(0);
     audiotest->start(&inputFile);}
-    else if(ACore::classQSound)
+    else if(AMultimedia::classQSound)
     {
         QSound::play(patch);
     }
@@ -49,4 +50,5 @@ void ASound::ForDevice(QString devicename)
     {
         if(ach.value(i).deviceName()==devicename) info=ach.value(i);
     }
+}
 }

@@ -12,9 +12,9 @@
 #include <QDateTime>
 #include "amath.h"
 #define MAX_MESSAGE_BOX 2
-#define REPLACE_TEXT_I "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
+
 #define MapFind(n,Map,keyd) QStringList keyd=Map.keys(); for(int n=0;n<keyd.size();n++)
-#define ACORE_VERSION "1.0.4"
+#define ACORE_VERSION "1.0.5"
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
 #define ASTRUCT_META_ENTER virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_END return result;}
@@ -27,7 +27,7 @@ namespace ACore
 	{
 		StdHTMLTagesFormat,
 		YumFormat,
-		IniFormat,
+        PostGetFormat,
         CfgFormat
 	};
     struct AbstractStruct
@@ -44,16 +44,6 @@ namespace ACore
         { return QMap<QString, QVariant>(); }
         bool FullRavno(AbstractStruct* h)
         { if(GetAllValues()==h->GetAllValues()) return true; else return false; }
-    };
-    struct TESTStruct : public AbstractStruct
-    {
-        QString MyName,TeXt,Key,StrKey;
-        ASTRUCT_META_NAME(MyName)
-        ASTRUCT_META_ENTER
-            ASTRUCT_APPEND(TeXt)
-            ASTRUCT_APPEND(Key)
-            ASTRUCT_APPEND(StrKey)
-        ASTRUCT_META_END
     };
 
 	class RecursionArray : public QMap<QString,QVariant>
@@ -133,14 +123,13 @@ namespace ACore
 		{
 			QThread::msleep(ms);
 		}
+        static void usleep(int us)
+        {
+            QThread::usleep(us);
+        }
 	};
-	QString html_find(QString htmlcode,QString sMin,QString sMax, int start=0);
-	QString html_find_s(QString htmlcode,QString html, int start=0);
 	QStringList splitStringArgs(QString value);
-	QString QtHtmlRecoder(QString html);
 	QString SpecialSybmolCoder(QString value,bool isDecode);
-
-
 	struct ASett
 	{
 		QString value;

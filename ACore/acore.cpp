@@ -13,27 +13,6 @@
 #include <QTextCodec>
 namespace ACore
 {
-	QString html_find(QString htmlcode,QString sMin,QString sMax, int start)
-	{
-		QString result;
-		int iMin,iMax;
-		iMin=htmlcode.indexOf(sMin,start)+sMin.size();
-		iMax=htmlcode.indexOf(sMax,iMin);
-		for(int i=iMin;i<iMax;i++) result+=htmlcode[i];
-		return result;
-	}
-	QString html_find_s(QString htmlcode,QString html, int start)
-	{
-		QString result;
-		int iMin,iMax;
-		QString sMax,sMin;
-		sMin="<"+html+">";
-		sMax="</"+html+">";
-		iMin=htmlcode.indexOf(sMin,start)+sMin.size();
-		iMax=htmlcode.indexOf(sMax,iMin);
-		for(int i=iMin;i<iMax;i++) result+=htmlcode[i];
-		return result;
-	}
 	QStringList splitStringArgs(QString value)
 	{
 		QString _value;
@@ -73,17 +52,6 @@ namespace ACore
         }
         return result;
     }
-	QString QtHtmlRecoder(QString html)
-	{
-		QString result;
-		QString sMin=REPLACE_TEXT_I;
-		QString sMax="</p>";
-		int iMin,iMax;
-		iMin=html.indexOf(sMin,0)+sMin.size();
-		iMax=html.indexOf(sMax,iMin);
-		for(int i=iMin;i<iMax;i++) result+=html[i];
-		return result;
-	}
 	QString SpecialSybmolCoder(QString value,bool isDecode)
 	{
 		if(!isDecode) return value.replace("<","/k0001").replace(">","/k0002");
@@ -384,6 +352,10 @@ namespace ACore
 				fromYumFormat(stream.readAll());
 				break;
 			}
+        case PostGetFormat:
+            {
+                break;
+            }
         case StdHTMLTagesFormat:
             {
                 fromHTMLTegsFormat(stream.readAll());
@@ -408,6 +380,11 @@ namespace ACore
 				stream.write(toYUMFormat().toLocal8Bit());
 				break;
 			}
+        case PostGetFormat:
+            {
+                stream.write(toPostGetFormat().toLocal8Bit());
+                break;
+            }
         case StdHTMLTagesFormat:
             {
                 stream.write(toHTMLTegsFormat().toLocal8Bit());
