@@ -1,7 +1,7 @@
 #include "acore.h"
 #include "amath.h"
 #include <QString>
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTimer>

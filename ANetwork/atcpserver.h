@@ -48,11 +48,14 @@ private:
 public:
     ServerThread(ATCPServer* serv);
     void UseCommand();
-    QMutex mutexArray;
     QLinkedList<ArrayCommand> ArrayCommands;
     ATCPServer* server;
     bool isStaticThread,isSleep;
     int currentIdThread,currentCommandID;
+signals:
+    void sendToClient(QTcpSocket* socket, QString str);
+    void sendToClient(int clientID, QString str);
+    void CloseClient(int clientID);
 public slots:
     void NewCommand(int idThread);
 };
@@ -65,15 +68,14 @@ public:
     QList<validClient*> ClientsList;
     QList<ServerThread*> ThreadList;
     bool launch(int port);
-    void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(int clientID, QString str);
     validClient *getClient(QTcpSocket* socket);
     int GetIDClient(QTcpSocket* socket);
-    virtual void UseCommand(ArrayCommand sCommand, validClient* nClient,int mClientID)
+    virtual void UseCommand(ArrayCommand sCommand, validClient* nClient,int mClientID,ServerThread* thisThread)
     {
         Q_UNUSED(sCommand);
         Q_UNUSED(nClient);
         Q_UNUSED(mClientID);
+        Q_UNUSED(thisThread);
     }
     virtual validClient* NewValidClient()
     {
@@ -86,14 +88,14 @@ public:
     }
     QTcpServer* serverd;
     int MinThread,MaxThread;
-protected:
-    QTimer* timer;
 signals:
 void signalCommand(int idThread);
 public slots:
     void clientConnected();
     void clientDisconnect();
     void clientReadyRead();
-    void MonitorTimer();
+    void sendToClient(QTcpSocket* socket, QString str);
+    void sendToClient(int clientID, QString str);
+    void CloseClient(int clientID);
 };
 #endif // ATCPSERVER_H

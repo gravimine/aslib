@@ -3,27 +3,14 @@
 ATCPServer::ATCPServer()
 {
     serverd = new QTcpServer(this);
-    timer = new QTimer();
+
     connect(serverd, SIGNAL(newConnection()),
                 this,         SLOT(clientConnected())
                );
-    connect(timer, SIGNAL(timeout()), this, SLOT(MonitorTimer()));
+
 
 }
-void ATCPServer::MonitorTimer()
-{
-    ACore::RecursionArray otchet;
-    otchet["ClientsListSize"]=ClientsList.size();
-    otchet["Threads"]=ThreadList.size();
-    for(int i=0;i<ThreadList.size();i++)
-    {
-        if(ThreadList.value(i)->isSleep)
-            otchet[QString::number(i)] = ThreadList.value(i)->ArrayCommands.size();
-        else
-            otchet[QString::number(i)] = ThreadList.value(i)->ArrayCommands.size()+1;
-    }
-    qDebug() << otchet.print();
-}
+
 
 ATCPServer::~ATCPServer()
 {
@@ -62,10 +49,15 @@ bool ATCPServer::launch(int port)
             connect(this, SIGNAL(signalCommand(int)),
                         newServerThread , SLOT(NewCommand(int))
                        , Qt::QueuedConnection);
+            connect(newServerThread, SIGNAL(CloseClient(int)),
+                        this , SLOT(CloseClient(int))
+                       , Qt::QueuedConnection);
+            connect(newServerThread, SIGNAL(sendToClient(int, QString)),
+                        this , SLOT(sendToClient(int, QString))
+                       , Qt::QueuedConnection);
             newServerThread->start();
             ThreadList << newServerThread;
         }
-        timer->start(1000);
         return true;
     }
 }
@@ -153,9 +145,7 @@ void ATCPServer::clientReadyRead()
             ThreadID = i;
         }
     }
-    ThreadList.value(ThreadID)->mutexArray.lock();
     ThreadList.value(ThreadID)->ArrayCommands << cmd;
-    ThreadList.value(ThreadID)->mutexArray.unlock();
     if(MinCommands==0) signalCommand(ThreadID);
     /*ClientsList[mClientID].data+=data;
     QString realData = ClientsList[mClientID].data;
@@ -174,6 +164,12 @@ void ATCPServer::sendToClient(int clientID, QString str)
     validClient* n = ClientsList.value(clientID);
     if(n->state != WaitCliseInClient)
     ClientsList.value(clientID)->socket->write(str.toUtf8());
+}
+void ATCPServer::CloseClient(int clientID)
+{
+    validClient* n = ClientsList.value(clientID);
+    if(n->state != WaitCliseInClient)
+    ClientsList.value(clientID)->socket->close();
 }
 ServerThread::ServerThread(ATCPServer *serv)
 {
@@ -204,14 +200,12 @@ void ServerThread::UseCommand()
     {
         return;
     }
-    mutexArray.lock();
     ArrayCommand sCommand = ArrayCommands.takeFirst();
-    mutexArray.unlock();
     int mClientID= server->GetIDClient(sCommand.client);
     validClient* nClient = server->ClientsList.value(mClientID);
     nClient->isUseCommand = true;
     nClient->numUsingCommands++;
-    server->UseCommand(sCommand,nClient,mClientID);
+    server->UseCommand(sCommand,nClient,mClientID,this);
     nClient->isUseCommand = false;
     nClient->numUsingCommands--;
     if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0)
