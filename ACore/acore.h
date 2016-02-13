@@ -15,7 +15,7 @@
 #define MAX_MESSAGE_BOX 2
 
 #define MapFind(n,Map,keyd) QStringList keyd=Map.keys(); for(int n=0;n<keyd.size();n++)
-#define ACORE_VERSION "1.0.6"
+#define ACORE_VERSION "1.0.7"
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
 #define ASTRUCT_META_ENTER virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_END return result;}
@@ -70,6 +70,7 @@ namespace ACore
         static QString VariantToString(const QVariant tmp);
         QMap<QString,QVariant> fromYumFormat(const QString yum,const QString level="",const bool isReturn=false);
         QMap<QString,QVariant> fromCfgFormat(const QString yum,const bool isReturn=false);
+        void fromPostGetFormat(QString post);
         RecursionArray(const QMap<QString,QVariant> h);
 		RecursionArray();
         void operator<<(AbstractStruct* h);

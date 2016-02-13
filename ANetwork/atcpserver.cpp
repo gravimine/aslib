@@ -31,9 +31,9 @@ ATCPServer::~ATCPServer()
     delete serverd;
 }
 
-bool ATCPServer::launch(int port)
+bool ATCPServer::launch(QString host, int port)
 {
-    if(!serverd->listen(QHostAddress::Any,port))
+    if(!serverd->listen(QHostAddress(host),port))
     {
         qDebug() << "Bad listen(): "+serverd->errorString();
         return false;
@@ -70,6 +70,7 @@ void ATCPServer::clientConnected()
         connect(pClientSocket, SIGNAL(readyRead()),
                 this,          SLOT(clientReadyRead())
                );
+        pClientSocket->setReadBufferSize(128000);
     validClient* h = NewValidClient();
     h->socket = pClientSocket;
     h->isAuth = false;
@@ -105,7 +106,7 @@ void ATCPServer::clientDisconnect()
 }
 validClient* ATCPServer::getClient(QTcpSocket* socket)
 {
-    validClient* result;
+    validClient* result = NULL;
     for(int i=0;i<ClientsList.size();i++)
     {
         if(ClientsList.value(i)->socket == socket) result = ClientsList[i];
@@ -114,7 +115,7 @@ validClient* ATCPServer::getClient(QTcpSocket* socket)
 }
 int ATCPServer::GetIDClient(QTcpSocket* socket)
 {
-    int result;
+    int result=0;
     for(int i=0;i<ClientsList.size();i++)
     {
         if(ClientsList.value(i)->socket == socket) result = i;
@@ -125,7 +126,8 @@ int ATCPServer::GetIDClient(QTcpSocket* socket)
 void ATCPServer::clientReadyRead()
 {
     QTcpSocket* socket = (QTcpSocket*)sender();
-    QByteArray data = socket->readAll();
+    QByteArray data = socket->read(socket->bytesAvailable());
+    if(data.isEmpty()) return;
     ArrayCommand cmd;
     cmd.client = socket;
     cmd.command = data;
@@ -133,7 +135,7 @@ void ATCPServer::clientReadyRead()
     int MinCommands=INT_MAX;
     for(int i=0;i<ThreadList.size();i++)
     {
-        if(ThreadList.value(i)->ArrayCommands.size()==0)
+        if(ThreadList.value(i)->isSleep)
         {
             MinCommands=0;
             ThreadID = i;
@@ -187,31 +189,33 @@ void ServerThread::NewCommand(int idThread)
 {
     if(idThread == currentIdThread)
     {
-        UseCommand();
-        if(!ArrayCommands.isEmpty()) UseCommand();
-        else isSleep=true;
+        isSleep=false;
+        while(!ArrayCommands.isEmpty()){
+        UseCommand();}
+        isSleep=true;
     }
 }
 
 void ServerThread::UseCommand()
 {
-    isSleep=false;
     if(ArrayCommands.isEmpty())
     {
         return;
     }
     ArrayCommand sCommand = ArrayCommands.takeFirst();
+
+
     int mClientID= server->GetIDClient(sCommand.client);
     validClient* nClient = server->ClientsList.value(mClientID);
     nClient->isUseCommand = true;
     nClient->numUsingCommands++;
-    server->UseCommand(sCommand,nClient,mClientID,this);
+    server->UseCommand(sCommand.command,nClient,mClientID,this);
     nClient->isUseCommand = false;
     nClient->numUsingCommands--;
     if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0)
     {
         server->DelValidClient( server->ClientsList[mClientID] );
         server->ClientsList.removeAt(mClientID);
-        sCommand.client->deleteLater();
+        delete sCommand.client;
     }
 }

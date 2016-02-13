@@ -41,6 +41,18 @@ namespace ACore
 		ReturnValue << _value;
 		return ReturnValue;
 	}
+    void RecursionArray::fromPostGetFormat(QString post)
+    {
+        QStringList argList = post.split("&");
+        if(argList.isEmpty()) argList << post;
+        for(int i=0;i<argList.size();i++)
+        {
+            QString str = argList.value(i);
+            QStringList values = str.split("=");
+             if(!values.value(0).isEmpty() && !values.value(1).isEmpty()) operator [](values.value(0))=values.value(1);
+        }
+    }
+
     QString RecursionArray::toPostGetFormat()
     {
         QString result;

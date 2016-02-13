@@ -16,18 +16,15 @@ enum ClientState
     WaitCliseInClient
 };
 
-struct newClient
+
+struct validClient
 {
+    QByteArray data;
+    int m_NextBlockSize;
     QTcpSocket* socket;
-    QString data;
     ClientState state;
     int numUsingCommands;
     bool isAuth,isUseCommand;
-};
-
-struct validClient : public newClient
-{
-
 };
 struct ArrayCommand
 {
@@ -67,10 +64,10 @@ public:
     ~ATCPServer();
     QList<validClient*> ClientsList;
     QList<ServerThread*> ThreadList;
-    bool launch(int port);
+    bool launch(QString host, int port);
     validClient *getClient(QTcpSocket* socket);
     int GetIDClient(QTcpSocket* socket);
-    virtual void UseCommand(ArrayCommand sCommand, validClient* nClient,int mClientID,ServerThread* thisThread)
+    virtual void UseCommand(QByteArray sCommand, validClient* nClient,int mClientID,ServerThread* thisThread)
     {
         Q_UNUSED(sCommand);
         Q_UNUSED(nClient);
