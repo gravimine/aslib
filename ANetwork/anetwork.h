@@ -61,7 +61,7 @@ public:
 	QString getCookie(QString name);
 	void clearCookie(QString url);
 	QList<QNetworkCookie> getCookies(QString url);
-	void post(QString text, int Typ);
+    virtual void post(QString text, int Typ);
 	void get(QString text, int Typ);
 };
 }

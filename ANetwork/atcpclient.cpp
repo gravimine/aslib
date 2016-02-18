@@ -26,6 +26,7 @@ void ATCPClient::connectToHost(QString Host,int port)
 }
 void ATCPClient::slotConected()
 {
+    qDebug() << "Connected";
     signalConnected();
 }
 void ATCPClient::slotError(QAbstractSocket::SocketError err)
@@ -46,8 +47,7 @@ void ATCPClient::slotReadyRead()
 {
     datad+=socket->readAll();
     qDebug() << datad;
-    if(!socket->bytesAvailable()){
-    signalRead(datad);datad.clear();}
+    signalRead(datad);datad.clear();
 }
 QTcpSocket* ATCPClient::currentSocket()
 {

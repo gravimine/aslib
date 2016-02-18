@@ -15,7 +15,7 @@
 #define MAX_MESSAGE_BOX 2
 
 #define MapFind(n,Map,keyd) QStringList keyd=Map.keys(); for(int n=0;n<keyd.size();n++)
-#define ACORE_VERSION "1.0.7"
+#define ACORE_VERSION "1.0.8"
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
 #define ASTRUCT_META_ENTER virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_END return result;}

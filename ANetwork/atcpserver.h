@@ -19,7 +19,7 @@ enum ClientState
 
 struct validClient
 {
-    QByteArray data;
+    QMutex mutex;
     int m_NextBlockSize;
     QTcpSocket* socket;
     ClientState state;
@@ -45,13 +45,14 @@ private:
 public:
     ServerThread(ATCPServer* serv);
     void UseCommand();
+    QMutex arrayMutex;
     QLinkedList<ArrayCommand> ArrayCommands;
     ATCPServer* server;
     bool isStaticThread,isSleep;
     int currentIdThread,currentCommandID;
 signals:
     void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(int clientID, QString str);
+    void sendToClient(int client, QString str);
     void CloseClient(int clientID);
 public slots:
     void NewCommand(int idThread);
@@ -64,7 +65,8 @@ public:
     ~ATCPServer();
     QList<validClient*> ClientsList;
     QList<ServerThread*> ThreadList;
-    bool launch(QString host, int port);
+    QString ClientInConnectText;
+    bool launch(QHostAddress host, int port);
     validClient *getClient(QTcpSocket* socket);
     int GetIDClient(QTcpSocket* socket);
     virtual void UseCommand(QByteArray sCommand, validClient* nClient,int mClientID,ServerThread* thisThread)

@@ -31,7 +31,7 @@ ATCPServer::~ATCPServer()
     delete serverd;
 }
 
-bool ATCPServer::launch(QString host, int port)
+bool ATCPServer::launch(QHostAddress host, int port)
 {
     if(!serverd->listen(QHostAddress(host),port))
     {
@@ -54,6 +54,9 @@ bool ATCPServer::launch(QString host, int port)
                        , Qt::QueuedConnection);
             connect(newServerThread, SIGNAL(sendToClient(int, QString)),
                         this , SLOT(sendToClient(int, QString))
+                       , Qt::QueuedConnection);
+            connect(newServerThread, SIGNAL(sendToClient(QTcpSocket*, QString)),
+                        this , SLOT(sendToClient(QTcpSocket*, QString))
                        , Qt::QueuedConnection);
             newServerThread->start();
             ThreadList << newServerThread;
@@ -79,7 +82,7 @@ void ATCPServer::clientConnected()
     h->state = NoAuthState;
     ClientsList << h;
     qDebug() << "Client connect "+pClientSocket->peerAddress().toString()+":"+QString::number(pClientSocket->peerPort());
-    sendToClient(pClientSocket, "Server Response: Connected!\n");
+    sendToClient(pClientSocket, ClientInConnectText);
 }
 void ATCPServer::clientDisconnect()
 {
@@ -88,8 +91,9 @@ void ATCPServer::clientDisconnect()
     {
         ArrayCommand t;
         t.client = socket;
-        while(ThreadList[i]->ArrayCommands.removeOne(t)) {
-        }
+        ThreadList[i]->arrayMutex.lock();
+        ThreadList[i]->ArrayCommands.removeAll(t);
+        ThreadList[i]->arrayMutex.unlock();
     }
     int mClientID = GetIDClient(socket);
     if(mClientID > -1 && mClientID < ClientsList.size()) {
@@ -147,7 +151,9 @@ void ATCPServer::clientReadyRead()
             ThreadID = i;
         }
     }
+    ThreadList.value(ThreadID)->arrayMutex.lock();
     ThreadList.value(ThreadID)->ArrayCommands << cmd;
+    ThreadList.value(ThreadID)->arrayMutex.unlock();
     if(MinCommands==0) signalCommand(ThreadID);
     /*ClientsList[mClientID].data+=data;
     QString realData = ClientsList[mClientID].data;
@@ -163,12 +169,14 @@ void ATCPServer::sendToClient(QTcpSocket* socket, QString str)
 }
 void ATCPServer::sendToClient(int clientID, QString str)
 {
+    if(clientID>ClientsList.size()-1) return;
     validClient* n = ClientsList.value(clientID);
-    if(n->state != WaitCliseInClient)
-    ClientsList.value(clientID)->socket->write(str.toUtf8());
+    if(n->state != WaitCliseInClient){
+    n->socket->write(str.toUtf8());}
 }
 void ATCPServer::CloseClient(int clientID)
 {
+    if(clientID>ClientsList.size()-1) return;
     validClient* n = ClientsList.value(clientID);
     if(n->state != WaitCliseInClient)
     ClientsList.value(clientID)->socket->close();
@@ -202,8 +210,9 @@ void ServerThread::UseCommand()
     {
         return;
     }
+    arrayMutex.lock();
     ArrayCommand sCommand = ArrayCommands.takeFirst();
-
+    arrayMutex.unlock();
 
     int mClientID= server->GetIDClient(sCommand.client);
     validClient* nClient = server->ClientsList.value(mClientID);
@@ -212,10 +221,11 @@ void ServerThread::UseCommand()
     server->UseCommand(sCommand.command,nClient,mClientID,this);
     nClient->isUseCommand = false;
     nClient->numUsingCommands--;
-    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0)
+    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0 & mClientID>server->ClientsList.size()-1)
     {
         server->DelValidClient( server->ClientsList[mClientID] );
         server->ClientsList.removeAt(mClientID);
-        delete sCommand.client;
+        nClient->socket->deleteLater();
+        delete nClient;
     }
 }
