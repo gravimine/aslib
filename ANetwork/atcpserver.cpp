@@ -221,7 +221,7 @@ void ServerThread::UseCommand()
     server->UseCommand(sCommand.command,nClient,mClientID,this);
     nClient->isUseCommand = false;
     nClient->numUsingCommands--;
-    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0 & mClientID>server->ClientsList.size()-1)
+    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0 && mClientID>server->ClientsList.size()-1)
     {
         server->DelValidClient( server->ClientsList[mClientID] );
         server->ClientsList.removeAt(mClientID);

@@ -45,9 +45,9 @@ void ATCPClient::slotError(QAbstractSocket::SocketError err)
 }
 void ATCPClient::slotReadyRead()
 {
-    datad+=socket->readAll();
-    qDebug() << datad;
-    signalRead(datad);datad.clear();
+    qDebug() << "slotReadyRead";
+    QString data=QString::fromUtf8( socket->readAll() );
+    signalRead(data);
 }
 QTcpSocket* ATCPClient::currentSocket()
 {
@@ -65,6 +65,7 @@ void ATCPClient::SetProxy(QString host,int port)
 void ATCPClient::Send(QString data)
 {
    socket->write(data.toUtf8());
+   socket->waitForBytesWritten(500);
 }
 ATCPClient::~ATCPClient()
 {
