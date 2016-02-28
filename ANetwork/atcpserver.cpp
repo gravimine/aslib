@@ -21,11 +21,11 @@ ATCPServer::~ATCPServer()
         thread->deleteLater();
         ThreadList.removeAt(i);
     }
-    for(int i=0;i<ClientsList.size();i++)
+    for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
     {
-        validClient* nClient = ClientsList[i];
+        validClient* nClient = (*i);
         delete nClient;
-        ClientsList.removeAt(i);
+        ClientsList.erase(i);
     }
     serverd->close();
     delete serverd;
@@ -49,11 +49,11 @@ bool ATCPServer::launch(QHostAddress host, int port)
             connect(this, SIGNAL(signalCommand(int)),
                         newServerThread , SLOT(NewCommand(int))
                        , Qt::QueuedConnection);
-            connect(newServerThread, SIGNAL(CloseClient(int)),
-                        this , SLOT(CloseClient(int))
+            connect(newServerThread, SIGNAL(CloseClient(validClient*)),
+                        this , SLOT(CloseClient(validClient*))
                        , Qt::QueuedConnection);
-            connect(newServerThread, SIGNAL(sendToClient(int, QString)),
-                        this , SLOT(sendToClient(int, QString))
+            connect(newServerThread, SIGNAL(sendToClient(validClient*, QString)),
+                        this , SLOT(sendToClient(validClient*, QString))
                        , Qt::QueuedConnection);
             connect(newServerThread, SIGNAL(sendToClient(QTcpSocket*, QString)),
                         this , SLOT(sendToClient(QTcpSocket*, QString))
@@ -95,34 +95,33 @@ void ATCPServer::clientDisconnect()
         ThreadList[i]->ArrayCommands.removeAll(t);
         ThreadList[i]->arrayMutex.unlock();
     }
-    int mClientID = GetIDClient(socket);
-    if(mClientID > -1 && mClientID < ClientsList.size()) {
-    if(!ClientsList.value(mClientID)->isUseCommand){
-        DelValidClient( ClientsList[mClientID] );
-        ClientsList.removeAt(mClientID);
+    QLinkedList<validClient*>::iterator mClientID = GetIDClient(socket);
+    if(!((*mClientID)->isUseCommand)){
+        DelValidClient( (*mClientID) );
+        ClientsList.erase(mClientID);
         socket->deleteLater();
     }
     else
     {
-        ClientsList[mClientID]->state = WaitCliseInClient;
-    }}
+        (*mClientID)->state = WaitCliseInClient;
+    }
     qDebug() << "Client disconnect";
 }
 validClient* ATCPServer::getClient(QTcpSocket* socket)
 {
     validClient* result = NULL;
-    for(int i=0;i<ClientsList.size();i++)
+    for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
     {
-        if(ClientsList.value(i)->socket == socket) result = ClientsList[i];
+        if((*i)->socket == socket) result = (*i);
     }
     return result;
 }
-int ATCPServer::GetIDClient(QTcpSocket* socket)
+QLinkedList<validClient*>::iterator ATCPServer::GetIDClient(QTcpSocket* socket)
 {
-    int result=0;
-    for(int i=0;i<ClientsList.size();i++)
+    QLinkedList<validClient*>::iterator result=NULL;
+    for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
     {
-        if(ClientsList.value(i)->socket == socket) result = i;
+        if((*i)->socket == socket) result = i;
     }
     return result;
 }
@@ -167,19 +166,17 @@ void ATCPServer::sendToClient(QTcpSocket* socket, QString str)
 {
     socket->write(str.toUtf8());
 }
-void ATCPServer::sendToClient(int clientID, QString str)
+void ATCPServer::sendToClient(validClient *clientID, QString str)
 {
-    if(clientID>ClientsList.size()-1) return;
-    validClient* n = ClientsList.value(clientID);
+    validClient* n = clientID;
     if(n->state != WaitCliseInClient){
     n->socket->write(str.toUtf8());}
 }
-void ATCPServer::CloseClient(int clientID)
+void ATCPServer::CloseClient(validClient *clientID)
 {
-    if(clientID>ClientsList.size()-1) return;
-    validClient* n = ClientsList.value(clientID);
+    validClient* n = clientID;
     if(n->state != WaitCliseInClient)
-    ClientsList.value(clientID)->socket->close();
+    n->socket->close();
 }
 ServerThread::ServerThread(ATCPServer *serv)
 {
@@ -214,17 +211,17 @@ void ServerThread::UseCommand()
     ArrayCommand sCommand = ArrayCommands.takeFirst();
     arrayMutex.unlock();
 
-    int mClientID= server->GetIDClient(sCommand.client);
-    validClient* nClient = server->ClientsList.value(mClientID);
+    QLinkedList<validClient*>::iterator mClientID= server->GetIDClient(sCommand.client);
+    validClient* nClient = (*mClientID);
     nClient->isUseCommand = true;
     nClient->numUsingCommands++;
     server->UseCommand(sCommand.command,nClient,mClientID,this);
     nClient->isUseCommand = false;
     nClient->numUsingCommands--;
-    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0 && mClientID>server->ClientsList.size()-1)
+    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0)
     {
-        server->DelValidClient( server->ClientsList[mClientID] );
-        server->ClientsList.removeAt(mClientID);
+        server->DelValidClient( nClient );
+        server->ClientsList.erase(mClientID);
         nClient->socket->deleteLater();
         delete nClient;
     }

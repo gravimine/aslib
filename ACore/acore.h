@@ -19,8 +19,15 @@
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
 #define ASTRUCT_META_ENTER virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_END return result;}
-#define ASTRUCT_META_NAME(n) virtual QString GetName() {return n;}
-#define ASTRUCT_APPEND(name) result[#name]=name;
+#define ASTRUCT_META_INIT(classname,n) virtual QString GetName() {return n;} \
+bool operator==(classname h) \
+{ \
+    if(GetName()==h.GetName()) return true; \
+    else return false;\
+}
+
+#define ASTRUCT_META_APPEND(name) result[#name]=name;
+#define ASTRUCT_META_APPEND_S(name,value) result[name]=value;
 //#define REPLACE_TEXT_II "<body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">"
 namespace ACore
 {
@@ -34,15 +41,8 @@ namespace ACore
     struct AbstractStruct
     {
     public:
-        bool operator==(AbstractStruct* h)
-        {
-            if(GetName()==h->GetName()) return true;
-            else return false;
-        }
-        virtual QString GetName()
-        { return QString(); }
-        virtual QMap<QString, QVariant> GetAllValues()
-        { return QMap<QString, QVariant>(); }
+        virtual QString GetName();
+        virtual QMap<QString, QVariant> GetAllValues();
         bool FullRavno(AbstractStruct* h)
         { if(GetAllValues()==h->GetAllValues()) return true; else return false; }
     };
@@ -64,17 +64,22 @@ namespace ACore
 		QString _toHTMLTegsFormat(RecursionArray Map);
 		QString _toYUMFormat(RecursionArray Map,QString Tabulator="");
         QString _toCFGFormat(RecursionArray Map);
+        QMap<QString,QVariant> _fromYumFormat(QString yum, QString level="");
+        QMap<QString,QVariant> _fromCfgFormat(QString yum);
+        QMap<QString,QVariant> _fromHTMLTegsFormat(QString value);
+        QMap<QString,QVariant> _fromPostGetFormat(QString post);
 	public:
         static QString printList(const QList<QVariant> List);
         static QString printMap(const RecursionArray Map,const QString NameMap="",const QString Tabulator="");
         static QString VariantToString(const QVariant tmp);
-        QMap<QString,QVariant> fromYumFormat(const QString yum,const QString level="",const bool isReturn=false);
-        QMap<QString,QVariant> fromCfgFormat(const QString yum,const bool isReturn=false);
-        void fromPostGetFormat(QString post);
+
         RecursionArray(const QMap<QString,QVariant> h);
 		RecursionArray();
         void operator<<(AbstractStruct* h);
-        QMap<QString,QVariant> fromHTMLTegsFormat(const QString value, bool isReturn=false);
+        void fromYumFormat(const QString yum);
+        void fromCfgFormat(const QString yum);
+        void fromPostGetFormat(const QString post);
+        void fromHTMLTegsFormat(const QString value);
 		QString toHTMLTegsFormat();
 		QString toYUMFormat();
 		QString toCFGFormat();

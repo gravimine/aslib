@@ -52,8 +52,8 @@ public:
     int currentIdThread,currentCommandID;
 signals:
     void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(int client, QString str);
-    void CloseClient(int clientID);
+    void sendToClient(validClient* client, QString str);
+    void CloseClient(validClient* clientID);
 public slots:
     void NewCommand(int idThread);
 };
@@ -63,13 +63,13 @@ class ATCPServer : public QObject
 public:
     ATCPServer();
     ~ATCPServer();
-    QList<validClient*> ClientsList;
+    QLinkedList<validClient*> ClientsList;
     QList<ServerThread*> ThreadList;
     QString ClientInConnectText;
     bool launch(QHostAddress host, int port);
     validClient *getClient(QTcpSocket* socket);
-    int GetIDClient(QTcpSocket* socket);
-    virtual void UseCommand(QByteArray sCommand, validClient* nClient,int mClientID,ServerThread* thisThread)
+    QLinkedList<validClient*>::iterator GetIDClient(QTcpSocket* socket);
+    virtual void UseCommand(QByteArray sCommand, validClient* nClient,QLinkedList<validClient*>::iterator mClientID,ServerThread* thisThread)
     {
         Q_UNUSED(sCommand);
         Q_UNUSED(nClient);
@@ -94,7 +94,7 @@ public slots:
     void clientDisconnect();
     void clientReadyRead();
     void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(int clientID, QString str);
-    void CloseClient(int clientID);
+    void sendToClient(validClient* clientID, QString str);
+    void CloseClient(validClient* clientID);
 };
 #endif // ATCPSERVER_H

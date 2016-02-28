@@ -41,16 +41,18 @@ namespace ACore
 		ReturnValue << _value;
 		return ReturnValue;
 	}
-    void RecursionArray::fromPostGetFormat(QString post)
+    QMap<QString, QVariant> RecursionArray::_fromPostGetFormat(const QString post)
     {
+        QMap<QString,QVariant> result;
         QStringList argList = post.split("&");
         if(argList.isEmpty()) argList << post;
         for(int i=0;i<argList.size();i++)
         {
             QString str = argList.value(i);
             QStringList values = str.split("=");
-             if(!values.value(0).isEmpty() && !values.value(1).isEmpty()) operator [](values.value(0))=values.value(1);
+             if(!values.value(0).isEmpty() && !values.value(1).isEmpty()) result[values.value(0)]=values.value(1);
         }
+        return result;
     }
 
     QString RecursionArray::toPostGetFormat()
@@ -537,7 +539,7 @@ namespace ACore
 		}
 		else return "Unkown()";
 	}
-	QMap<QString,QVariant> RecursionArray::fromYumFormat(QString yum,QString level, bool isReturn)
+    QMap<QString,QVariant> RecursionArray::_fromYumFormat(QString yum,QString level)
 	{
 		QStringList fromBR=yum.split("\n");
 		QMap<QString,QVariant> ReturnMap;
@@ -552,8 +554,7 @@ namespace ACore
 			QString Value=ValueString.mid(position+1);
 			if(!Value.isEmpty())
 			{
-				if(isReturn) ReturnMap[NameValue]=Value;
-				else operator [](NameValue)=Value;
+                ReturnMap[NameValue]=Value;
 			}
 			else
 			{
@@ -567,9 +568,8 @@ namespace ACore
 					}
 					else stop=false;
 				}
-				QMap<QString,QVariant> ValueMap=fromYumFormat(sendString,nextLevel,true);
-				if(isReturn) ReturnMap[NameValue]=ValueMap;
-				else operator [](NameValue)=ValueMap;
+                QMap<QString,QVariant> ValueMap=_fromYumFormat(sendString,nextLevel);
+                ReturnMap[NameValue]=ValueMap;
 				i+=unusedsize;
 			}
 		}
@@ -580,7 +580,7 @@ namespace ACore
         this->operator [](h->GetName())=h->GetAllValues();
     }
 
-    QMap<QString,QVariant> RecursionArray::fromCfgFormat(QString yum, bool isReturn)
+    QMap<QString,QVariant> RecursionArray::_fromCfgFormat(QString yum)
 	{
 		QStringList fromBR=yum.split("\n");
 		QMap<QString,QVariant> ReturnMap;
@@ -609,8 +609,7 @@ namespace ACore
 			}
 			if(ValueString.indexOf("{")<=0)
 			{
-				if(isReturn) ReturnMap[NameValue]=Value;
-				else operator [](NameValue)=Value;
+                ReturnMap[NameValue]=Value;
 			}
 			else
 			{
@@ -636,10 +635,9 @@ namespace ACore
                         sendString+=fromBR.value(i+unusedsize)+"\n";
                     }
 				}
-				QMap<QString,QVariant> ValueMap=fromCfgFormat(sendString,true);
+                QMap<QString,QVariant> ValueMap=_fromCfgFormat(sendString);
 				QString sNameValue=DeleteQuotes(ValueString.remove("{").split(" ").value(0));
-				if(isReturn) ReturnMap[sNameValue]=ValueMap;
-				else operator [](sNameValue)=ValueMap;
+                ReturnMap[sNameValue]=ValueMap;
 				i+=unusedsize;
 			}
 		}
@@ -652,7 +650,7 @@ namespace ACore
 	RecursionArray::RecursionArray()
 	{
 	}
-    QMap<QString,QVariant> RecursionArray::fromHTMLTegsFormat(const QString value, bool isReturn)
+    QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value)
 	{
 		QMap<QString,QVariant> ReturnValue; //Возвращаемый массив
 		int i=0;
@@ -683,18 +681,16 @@ namespace ACore
 			else {
 				QString sValue; //Значение переменной
 				sValue=value.mid(iMax+1,nMax-iMax-1);
-				QMap<QString,QVariant> temp=fromHTMLTegsFormat(sValue,true); //Рекурсия
+                QMap<QString,QVariant> temp=_fromHTMLTegsFormat(sValue); //Рекурсия
 
 				if(sValue.isEmpty() || NameValue.isEmpty()) {
 					int tmp=iMax-iMin;
 					i=nMax+tmp;
 					continue; }
 				if(temp.isEmpty()) //Если рекурсия не нашла других значений переменной
-				if(isReturn) ReturnValue[NameValue]=sValue;
-				else operator [](NameValue)=sValue; //Запись элемента в Map
+                ReturnValue[NameValue]=sValue;
 				else
-				if(isReturn) ReturnValue[NameValue]=temp;
-				else operator [](NameValue)=temp; //Запись элемента в Map
+                ReturnValue[NameValue]=temp;
 				int tmp=iMax-iMin; //Переход к следующему
 				i=nMax+tmp;}
 		}
@@ -704,6 +700,22 @@ namespace ACore
 	{
 		return _toHTMLTegsFormat(*this);
 	}
+    void RecursionArray::fromHTMLTegsFormat(const QString value)
+    {
+        operator=(_fromHTMLTegsFormat(value));
+    }
+    void RecursionArray::fromPostGetFormat(QString post)
+    {
+        operator=(_fromPostGetFormat(post));
+    }
+    void RecursionArray::fromCfgFormat(const QString yum)
+    {
+        operator=(_fromCfgFormat(yum));
+    }
+    void RecursionArray::fromYumFormat(const QString yum)
+    {
+        operator=(_fromYumFormat(yum));
+    }
 	QString RecursionArray::toYUMFormat()
 	{
 		return _toYUMFormat(*this);
