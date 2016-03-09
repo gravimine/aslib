@@ -10,22 +10,38 @@
 #include <QTimer>
 enum ClientState
 {
+    UncorrenctState,
     NoAuthState,
     AuthState,
     waitCloseInServer,
     WaitCliseInClient
 };
 
-
-struct validClient
+class ATCPServer;
+class validClient :public QObject
 {
+    Q_OBJECT
+public:
+    virtual ~validClient()
+    {
+        socket->deleteLater();
+    }
+    validClient()
+    {
+        numUsingCommands = 0;
+        state = UncorrenctState;
+    }
+    ATCPServer* servers;
+    void DeleteMe();
+    QLinkedList<validClient*>::iterator iterator;
+
     QMutex mutex;
-    int m_NextBlockSize;
     QTcpSocket* socket;
     ClientState state;
     int numUsingCommands;
-    bool isAuth,isUseCommand;
+    bool isAuth;
 };
+
 struct ArrayCommand
 {
     QByteArray command;
@@ -51,8 +67,8 @@ public:
     bool isStaticThread,isSleep;
     int currentIdThread,currentCommandID;
 signals:
-    void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(validClient* client, QString str);
+    void sendToClient(QTcpSocket* socket, QByteArray str);
+    void sendToClient(validClient* client, QByteArray str);
     void CloseClient(validClient* clientID);
 public slots:
     void NewCommand(int idThread);
@@ -64,26 +80,22 @@ public:
     ATCPServer();
     ~ATCPServer();
     QLinkedList<validClient*> ClientsList;
+    QMutex mutex;
     QList<ServerThread*> ThreadList;
     QString ClientInConnectText;
     bool launch(QHostAddress host, int port);
     validClient *getClient(QTcpSocket* socket);
     QLinkedList<validClient*>::iterator GetIDClient(QTcpSocket* socket);
-    virtual void UseCommand(QByteArray sCommand, validClient* nClient,QLinkedList<validClient*>::iterator mClientID,ServerThread* thisThread)
+    virtual void UseCommand(QByteArray sCommand, validClient* nClient,ServerThread* thisThread)
     {
         Q_UNUSED(sCommand);
         Q_UNUSED(nClient);
-        Q_UNUSED(mClientID);
         Q_UNUSED(thisThread);
     }
     virtual validClient* NewValidClient()
     {
         validClient* result = new validClient();
         return result;
-    }
-    virtual void DelValidClient(validClient* h)
-    {
-        delete h;
     }
     QTcpServer* serverd;
     int MinThread,MaxThread;
@@ -93,8 +105,8 @@ public slots:
     void clientConnected();
     void clientDisconnect();
     void clientReadyRead();
-    void sendToClient(QTcpSocket* socket, QString str);
-    void sendToClient(validClient* clientID, QString str);
+    void sendToClient(QTcpSocket* socket, QByteArray str);
+    void sendToClient(validClient* clientID, QByteArray str);
     void CloseClient(validClient* clientID);
 };
 #endif // ATCPSERVER_H

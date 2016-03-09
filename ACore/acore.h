@@ -106,6 +106,14 @@ namespace ACore
     signals:
         void AddLog();
 	};
+    class AArguments
+    {
+    public:
+        QStringList OtcherArgs;
+        QStringList SymbolArgs;
+        void Load(QStringList args);
+    };
+
 	class ASettings : public RecursionArray
 	{
 	public:

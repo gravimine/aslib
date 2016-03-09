@@ -687,7 +687,7 @@ namespace ACore
 					int tmp=iMax-iMin;
 					i=nMax+tmp;
 					continue; }
-				if(temp.isEmpty()) //Если рекурсия не нашла других значений переменной
+                if(temp.isEmpty()) //Если рекурсия не нашла других переменных в переменной
                 ReturnValue[NameValue]=sValue;
 				else
                 ReturnValue[NameValue]=temp;
@@ -716,6 +716,25 @@ namespace ACore
     {
         operator=(_fromYumFormat(yum));
     }
+    void AArguments::Load(QStringList args)
+    {
+        for(int i=0;i<args.size();i++)
+        {
+            QString arg;
+            if(arg.mid(0,1)=="-")
+            {
+                for(int i=1;i<arg.size();i++)
+                {
+                    SymbolArgs << arg.mid(i,1);
+                }
+            }
+            else
+            {
+                OtcherArgs << arg;
+            }
+        }
+    }
+
 	QString RecursionArray::toYUMFormat()
 	{
 		return _toYUMFormat(*this);
