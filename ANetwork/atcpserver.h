@@ -67,7 +67,6 @@ public:
     bool isStaticThread,isSleep;
     int currentIdThread,currentCommandID;
 signals:
-    void sendToClient(QTcpSocket* socket, QByteArray str);
     void sendToClient(validClient* client, QByteArray str);
     void CloseClient(validClient* clientID);
 public slots:
@@ -84,6 +83,7 @@ public:
     QList<ServerThread*> ThreadList;
     QString ClientInConnectText;
     bool launch(QHostAddress host, int port);
+    //bool launchMetaSever(QHostAddress host, int port);
     validClient *getClient(QTcpSocket* socket);
     QLinkedList<validClient*>::iterator GetIDClient(QTcpSocket* socket);
     virtual void UseCommand(QByteArray sCommand, validClient* nClient,ServerThread* thisThread)
@@ -98,14 +98,14 @@ public:
         return result;
     }
     QTcpServer* serverd;
+    QList<QTcpServer*> addonServer;
     int MinThread,MaxThread;
 signals:
-void signalCommand(int idThread);
+    void signalCommand(int idThread);
 public slots:
     void clientConnected();
     void clientDisconnect();
     void clientReadyRead();
-    void sendToClient(QTcpSocket* socket, QByteArray str);
     void sendToClient(validClient* clientID, QByteArray str);
     void CloseClient(validClient* clientID);
 };

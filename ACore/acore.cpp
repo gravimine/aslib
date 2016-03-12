@@ -207,54 +207,9 @@ namespace ACore
 	{
 		return grad*M_PI/180;
 	}
-	void AAppCore::SendM(QString text)
-	{
-		MessageBoxNumber++;
-		if(MessageBoxNumber>MAX_MESSAGE_BOX)
-		{
-			//Коментарий  сохранен в файле
-			//Не сохранен
-			qDebug() << text;
-			return;
-		}
-		QMessageBox* pmbx =
-		new QMessageBox(QMessageBox::NoIcon,ProgramName,
-		text
-		);
-		pmbx->exec();
-		delete pmbx;
-		MessageBoxNumber--;
-	}
-	void AAppCore::Error(QString text)
-	{
-		qDebug() << "Критическая ошибка: "+text;
-		QMessageBox* pmbx =
-		new QMessageBox(QMessageBox::Critical,ProgramName+" fatal error",
-		text
-		);
-		pmbx->exec();
-		delete pmbx;
-	}
-	bool AAppCore::MessageQuest(QString text)
-	{
-		qDebug() << "Вопрос: "+text;
-		QMessageBox* pmbx =
-		new QMessageBox(ProgramName,
-		text,
-		QMessageBox::Information,
-		QMessageBox::Yes,
-		QMessageBox::No,
-		QMessageBox::Cancel | QMessageBox::Escape);
-		int n = pmbx->exec();
-		delete pmbx;
-		if (n == QMessageBox::Yes)return true;
-		else return false;
-	}
 
-	void AAppCore::SetProgramName(QString name)
-	{
-		ProgramName=name;
-	}
+
+
     void ALog::SetCoutDebug(bool i)
     {
         isDebug=i;
@@ -266,19 +221,6 @@ namespace ACore
     ALog::~ALog()
     {
     }
-	AAppCore::AAppCore()
-	{
-		MessageBoxNumber=0;
-		ProgramName="NULL";
-	}
-	AAppCore::~AAppCore()
-	{
-	}
-	AAppCore::AAppCore(QString ProgName)
-	{
-		MessageBoxNumber=0;
-		ProgramName=ProgName;
-	}
 	void ALog::SaveLog()
 	{
 		QFile logging;

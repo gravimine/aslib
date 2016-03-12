@@ -46,18 +46,12 @@ bool ATCPServer::launch(QHostAddress host, int port)
             ServerThread * newServerThread = new ServerThread(this);
             newServerThread->currentIdThread = i;
             newServerThread->isStaticThread = true;
-            connect(this, SIGNAL(signalCommand(int)),
-                        newServerThread , SLOT(NewCommand(int))
-                       , Qt::QueuedConnection);
-            connect(newServerThread, SIGNAL(CloseClient(validClient*)),
-                        this , SLOT(CloseClient(validClient*))
-                       , Qt::QueuedConnection);
-            connect(newServerThread, SIGNAL(sendToClient(validClient*, QByteArray)),
-                        this , SLOT(sendToClient(validClient*, QByteArray))
-                       , Qt::QueuedConnection);
-            connect(newServerThread, SIGNAL(sendToClient(QTcpSocket*, QByteArray)),
-                        this , SLOT(sendToClient(QTcpSocket*, QByteArray))
-                       , Qt::QueuedConnection);
+            connect(this, &ATCPServer::signalCommand,newServerThread ,
+                         &ServerThread::NewCommand);
+            connect(newServerThread, &ServerThread::CloseClient, this,
+                        &ATCPServer::CloseClient);
+            connect(newServerThread, &ServerThread::sendToClient, this,
+                        &ATCPServer::sendToClient);
             newServerThread->start();
             ThreadList << newServerThread;
         }
@@ -67,11 +61,11 @@ bool ATCPServer::launch(QHostAddress host, int port)
 void ATCPServer::clientConnected()
 {
     QTcpSocket* pClientSocket = serverd->nextPendingConnection();
-    connect(pClientSocket, SIGNAL(disconnected()),
-                this , SLOT(clientDisconnect())
+    connect(pClientSocket, &QTcpSocket::disconnected,
+                this , &ATCPServer::clientDisconnect
                );
-        connect(pClientSocket, SIGNAL(readyRead()),
-                this,          SLOT(clientReadyRead())
+        connect(pClientSocket, &QTcpSocket::readyRead,
+                this,          &ATCPServer::clientReadyRead
                );
         pClientSocket->setReadBufferSize(128000);
     validClient* h = NewValidClient();
@@ -83,7 +77,7 @@ void ATCPServer::clientConnected()
     ClientsList << h;
     h->iterator = ClientsList.end()--;
     qDebug() << "Client connect "+pClientSocket->peerAddress().toString()+":"+QString::number(pClientSocket->peerPort());
-    sendToClient(pClientSocket, ClientInConnectText.toUtf8());
+    sendToClient(h, ClientInConnectText.toUtf8());
 }
 void ATCPServer::clientDisconnect()
 {
@@ -166,10 +160,6 @@ void ATCPServer::clientReadyRead()
         return;
     }
     ClientsList[mClientID].data.clear();*/
-}
-void ATCPServer::sendToClient(QTcpSocket* socket, QByteArray str)
-{
-    socket->write(str);
 }
 void ATCPServer::sendToClient(validClient *clientID, QByteArray str)
 {
