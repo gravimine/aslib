@@ -11,21 +11,21 @@
 #include <QDate>
 #include <QDateTime>
 #include <QDebug>
+#include <initializer_list>
 #include "amath.h"
 #define MAX_MESSAGE_BOX 2
 
 #define MapFind(n,Map,keyd) QStringList keyd=Map.keys(); for(int n=0;n<keyd.size();n++)
-#define ACORE_VERSION "1.1.0"
+#define ACORE_VERSION "1.1.1"
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
-#define ASTRUCT_META_ENTER virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_END return result;}
 #define ASTRUCT_META_INIT(classname,n) virtual QString GetName() {return n;} \
 bool operator==(classname h) \
 { \
     if(GetName()==h.GetName()) return true; \
     else return false;\
-}
-
+} \
+virtual QMap<QString, QVariant> GetAllValues() { QMap<QString, QVariant> result;
 #define ASTRUCT_META_APPEND(name) result[#name]=name;
 #define ASTRUCT_META_APPEND_S(name,value) result[name]=value;
 //#define REPLACE_TEXT_II "<body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">"
@@ -38,6 +38,12 @@ namespace ACore
         PostGetFormat,
         CfgFormat
 	};
+    struct RecVal
+    {
+        QString name;
+        QVariant val;
+    };
+
     struct AbstractStruct
     {
     public:
@@ -75,29 +81,30 @@ namespace ACore
 
         RecursionArray(const QMap<QString,QVariant> h);
 		RecursionArray();
+        RecursionArray(std::initializer_list<RecVal> list);
         void operator<<(AbstractStruct* h);
-        void fromYumFormat(const QString yum);
-        void fromCfgFormat(const QString yum);
-        void fromPostGetFormat(const QString post);
-        void fromHTMLTegsFormat(const QString value);
-		QString toHTMLTegsFormat();
-		QString toYUMFormat();
-		QString toCFGFormat();
-        QString toPostGetFormat();
+        void fromYum(const QString yum);
+        void fromCfg(const QString yum);
+        void fromPost(const QString post);
+        void fromHtml(const QString value);
+        QString toHtml();
+        QString toYum();
+        QString toCfg();
+        QString toPost();
 		QString print();
 	};
     class ALog : public QObject, public QStringList
 	{
         Q_OBJECT
 	public:
-		void SaveLog();
+        void savelog();
 		QString toString();
 		QString toHTML();
-        void SetCoutDebug(bool i);
+        void setcoutdebug(bool i);
 		void operator <<(QString h);
 		void addInfo(QString h);
 		void addError(QString h);
-		void SetFile(QString data);
+        void setfile(QString data);
         ALog();
         ~ALog();
 	protected:
@@ -111,7 +118,7 @@ namespace ACore
     public:
         QStringList OtcherArgs;
         QStringList SymbolArgs;
-        void Load(QStringList args);
+        void load(QStringList args);
     };
 
 	class ASettings : public RecursionArray

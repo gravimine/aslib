@@ -67,7 +67,7 @@ void ATCPServer::clientConnected()
         connect(pClientSocket, &QTcpSocket::readyRead,
                 this,          &ATCPServer::clientReadyRead
                );
-        pClientSocket->setReadBufferSize(128000);
+        //pClientSocket->setReadBufferSize(128000);
     validClient* h = NewValidClient();
     h->socket = pClientSocket;
     h->isAuth = false;
@@ -91,11 +91,11 @@ void ATCPServer::clientDisconnect()
         ThreadList[i]->arrayMutex.unlock();
     }
     QLinkedList<validClient*>::iterator mClientID = GetIDClient(socket);
-    if((*mClientID)->numUsingCommands == 0){
+    if((*mClientID)->numUsingCommands <= 0){
         mutex.lock();
         ClientsList.erase(mClientID);
-        mutex.unlock();
         delete (*mClientID);
+        mutex.unlock();
         qDebug() << "Client disconnect Normal";
     }
     else
@@ -116,12 +116,10 @@ validClient* ATCPServer::getClient(QTcpSocket* socket)
 QLinkedList<validClient*>::iterator ATCPServer::GetIDClient(QTcpSocket* socket)
 {
     QLinkedList<validClient*>::iterator result=NULL;
-    mutex.lock();
     for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
     {
         if((*i)->socket == socket) result = i;
     }
-    mutex.unlock();
     return result;
 }
 
@@ -149,9 +147,7 @@ void ATCPServer::clientReadyRead()
             ThreadID = i;
         }
     }
-    ThreadList.value(ThreadID)->arrayMutex.lock();
     ThreadList.value(ThreadID)->ArrayCommands << cmd;
-    ThreadList.value(ThreadID)->arrayMutex.unlock();
     if(MinCommands==0) signalCommand(ThreadID);
     /*ClientsList[mClientID].data+=data;
     QString realData = ClientsList[mClientID].data;
@@ -163,10 +159,11 @@ void ATCPServer::clientReadyRead()
 }
 void ATCPServer::sendToClient(validClient *clientID, QByteArray str)
 {
+    clientID->numUsingCommands--;
     if(clientID->state != WaitCliseInClient && clientID->socket->state() != QTcpSocket::ClosingState){
     clientID->socket->write(str);}
-    clientID->numUsingCommands--;
-    if(clientID->state == WaitCliseInClient && clientID->numUsingCommands == 0)
+
+    if(clientID->state == WaitCliseInClient && clientID->numUsingCommands <= 0)
     {
         clientID->DeleteMe();
     }
@@ -217,18 +214,20 @@ void ServerThread::UseCommand()
     }
     ArrayCommand sCommand = ArrayCommands.takeFirst();
     arrayMutex.unlock();
-
+    server->mutex.lock();
     QLinkedList<validClient*>::iterator mClientID= server->GetIDClient(sCommand.client);
     validClient* nClient = (*mClientID);
+    server->mutex.unlock();
     nClient->numUsingCommands++;
     server->UseCommand(sCommand.command,nClient,this);
     nClient->numUsingCommands--;
-    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands == 0)
+    if(nClient->state == WaitCliseInClient && nClient->numUsingCommands <= 0)
     {
         server->mutex.lock();
         server->ClientsList.erase(mClientID);
-        server->mutex.unlock();
         delete nClient ;
+        server->mutex.unlock();
+
         qDebug() << "Client disconnect END";
     }
 }

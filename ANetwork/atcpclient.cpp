@@ -73,7 +73,7 @@ ATCPClient::~ATCPClient()
 }
 QString FormatHTTP(ACore::RecursionArray Map,QString host)
 {
-    return "GET / HTTP/1.1"+Map.toYUMFormat()+"\nHost:"+host+"\n\n";
+    return "GET / HTTP/1.1"+Map.toYum()+"\nHost:"+host+"\n\n";
 }
 }
 

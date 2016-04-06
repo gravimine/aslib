@@ -41,6 +41,14 @@ namespace ACore
 		ReturnValue << _value;
 		return ReturnValue;
 	}
+    RecursionArray::RecursionArray(std::initializer_list<RecVal> list)
+    {
+        for(auto &i : list)
+        {
+            this->operator [](i.name) = i.val;
+        }
+    }
+
     QMap<QString, QVariant> RecursionArray::_fromPostGetFormat(const QString post)
     {
         QMap<QString,QVariant> result;
@@ -55,7 +63,7 @@ namespace ACore
         return result;
     }
 
-    QString RecursionArray::toPostGetFormat()
+    QString RecursionArray::toPost()
     {
         QString result;
         QStringList keyd=keys();
@@ -210,7 +218,7 @@ namespace ACore
 
 
 
-    void ALog::SetCoutDebug(bool i)
+    void ALog::setcoutdebug(bool i)
     {
         isDebug=i;
     }
@@ -221,7 +229,7 @@ namespace ACore
     ALog::~ALog()
     {
     }
-	void ALog::SaveLog()
+    void ALog::savelog()
 	{
 		QFile logging;
 		logging.setFileName(patch);
@@ -270,7 +278,7 @@ namespace ACore
         if(isDebug) qDebug() << "[error]"+dtime()+h;
         AddLog();
 	}
-	void ALog::SetFile(QString data)
+    void ALog::setfile(QString data)
 	{
 		patch=data;
 	}
@@ -300,12 +308,12 @@ namespace ACore
 		{
 		case CfgFormat:
 			{
-				fromCfgFormat(stream.readAll());
+                fromCfg(stream.readAll());
 				break;
 			}
 		case YumFormat:
 			{
-				fromYumFormat(stream.readAll());
+                fromYum(stream.readAll());
 				break;
 			}
         case PostGetFormat:
@@ -314,7 +322,7 @@ namespace ACore
             }
         case StdHTMLTagesFormat:
             {
-                fromHTMLTegsFormat(stream.readAll());
+                fromHtml(stream.readAll());
                 break;
             }
 		}
@@ -328,22 +336,22 @@ namespace ACore
 		{
 		case CfgFormat:
 			{
-				stream.write(toCFGFormat().toLocal8Bit());
+                stream.write(toCfg().toLocal8Bit());
 				break;
 			}
 		case YumFormat:
 			{
-				stream.write(toYUMFormat().toLocal8Bit());
+                stream.write(toYum().toLocal8Bit());
 				break;
 			}
         case PostGetFormat:
             {
-                stream.write(toPostGetFormat().toLocal8Bit());
+                stream.write(toPost().toLocal8Bit());
                 break;
             }
         case StdHTMLTagesFormat:
             {
-                stream.write(toHTMLTegsFormat().toLocal8Bit());
+                stream.write(toHtml().toLocal8Bit());
                 break;
             }
 		}
@@ -638,27 +646,27 @@ namespace ACore
 		}
 		return ReturnValue; //Возврат готового Map
 	}
-	QString RecursionArray::toHTMLTegsFormat()
+    QString RecursionArray::toHtml()
 	{
 		return _toHTMLTegsFormat(*this);
 	}
-    void RecursionArray::fromHTMLTegsFormat(const QString value)
+    void RecursionArray::fromHtml(const QString value)
     {
         operator=(_fromHTMLTegsFormat(value));
     }
-    void RecursionArray::fromPostGetFormat(QString post)
+    void RecursionArray::fromPost(QString post)
     {
         operator=(_fromPostGetFormat(post));
     }
-    void RecursionArray::fromCfgFormat(const QString yum)
+    void RecursionArray::fromCfg(const QString yum)
     {
         operator=(_fromCfgFormat(yum));
     }
-    void RecursionArray::fromYumFormat(const QString yum)
+    void RecursionArray::fromYum(const QString yum)
     {
         operator=(_fromYumFormat(yum));
     }
-    void AArguments::Load(QStringList args)
+    void AArguments::load(QStringList args)
     {
         for(int i=0;i<args.size();i++)
         {
@@ -677,11 +685,11 @@ namespace ACore
         }
     }
 
-	QString RecursionArray::toYUMFormat()
+    QString RecursionArray::toYum()
 	{
 		return _toYUMFormat(*this);
 	}
-	QString RecursionArray::toCFGFormat()
+    QString RecursionArray::toCfg()
 	{
 		return _toCFGFormat(*this);
 	}
