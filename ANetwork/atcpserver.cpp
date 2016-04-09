@@ -76,8 +76,7 @@ void ATCPServer::clientConnected()
     h->servers = this;
     ClientsList << h;
     h->iterator = ClientsList.end()--;
-    qDebug() << "Client connect "+pClientSocket->peerAddress().toString()+":"+QString::number(pClientSocket->peerPort());
-    sendToClient(h, ClientInConnectText.toUtf8());
+    signalClientConnected(h);
 }
 void ATCPServer::clientDisconnect()
 {

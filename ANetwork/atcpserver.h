@@ -81,7 +81,6 @@ public:
     QLinkedList<validClient*> ClientsList;
     QMutex mutex;
     QList<ServerThread*> ThreadList;
-    QString ClientInConnectText;
     bool launch(QHostAddress host, int port);
     //bool launchMetaSever(QHostAddress host, int port);
     validClient *getClient(QTcpSocket* socket);
@@ -102,6 +101,7 @@ public:
     int MinThread,MaxThread;
 signals:
     void signalCommand(int idThread);
+    void signalClientConnected(validClient* user);
 public slots:
     void clientConnected();
     void clientDisconnect();

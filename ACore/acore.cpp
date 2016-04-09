@@ -304,6 +304,10 @@ namespace ACore
 		QFile stream;
 		stream.setFileName(file);
 		stream.open(QIODevice::ReadOnly);
+        if(stream.bytesAvailable()<=0)
+        {
+            stream.close();
+        }
 		switch(FileFormat)
 		{
 		case CfgFormat:
@@ -326,6 +330,7 @@ namespace ACore
                 break;
             }
 		}
+        stream.close();
 	}
 	void ASettings::SaveSettings()
 	{
