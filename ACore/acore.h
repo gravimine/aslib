@@ -16,7 +16,7 @@
 #define MAX_MESSAGE_BOX 2
 
 #define MapFind(n,Map,keyd) QStringList keyd=Map.keys(); for(int n=0;n<keyd.size();n++)
-#define ACORE_VERSION "1.1.1"
+#define ACORE_VERSION "1.1.2"
 #define foreash(n,mas) for(int n=0;n<mas.size();n++)
 #define ASTRUCT_META_END return result;}
 #define ASTRUCT_META_INIT(classname,n) virtual QString GetName() {return n;} \
@@ -64,16 +64,18 @@ namespace ACore
         }
     };
 
-	class RecursionArray : public QMap<QString,QVariant>
+    class RecursionArray : public QMap<QString,QVariant>
 	{
 	private:
 		QString _toHTMLTegsFormat(RecursionArray Map);
 		QString _toYUMFormat(RecursionArray Map,QString Tabulator="");
         QString _toCFGFormat(RecursionArray Map);
+        QString _toArcanFormat(RecursionArray Map);
         QMap<QString,QVariant> _fromYumFormat(QString yum, QString level="");
         QMap<QString,QVariant> _fromCfgFormat(QString yum);
         QMap<QString,QVariant> _fromHTMLTegsFormat(QString value);
         QMap<QString,QVariant> _fromPostGetFormat(QString post);
+        QMap<QString,QVariant> _fromArcanFromat(QString post);
 	public:
         static QString printList(const QList<QVariant> List);
         static QString printMap(const RecursionArray Map,const QString NameMap="",const QString Tabulator="");
@@ -87,10 +89,12 @@ namespace ACore
         void fromCfg(const QString yum);
         void fromPost(const QString post);
         void fromHtml(const QString value);
+        void fromArcan(const QString value);
         QString toHtml();
         QString toYum();
         QString toCfg();
         QString toPost();
+        QString toArcan();
 		QString print();
 	};
     class ALog : public QObject, public QStringList

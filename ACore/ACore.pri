@@ -5,4 +5,5 @@ INCLUDEPATH += $$PWD
 HEADERS  += $$PWD/acore.h \
     $$PWD/amath.h \
     $$PWD/aalgoritm.h \
-    $$PWD/abbcodec.h
+    $$PWD/abbcodec.h \
+    $$PWD/atests.h

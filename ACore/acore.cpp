@@ -1,5 +1,6 @@
 #include "acore.h"
 #include "amath.h"
+#include "atests.h"
 #include <QString>
 #include <QtWidgets/QMessageBox>
 #include <QNetworkRequest>
@@ -367,66 +368,69 @@ namespace ACore
 	QString RecursionArray::_toHTMLTegsFormat(RecursionArray Map)
 	{
 		QString ReturnValue;
-		int i=0;
-		QList<QString> keys=Map.keys();
-		while(i<keys.size())
+        for(auto i = Map.begin();i!=Map.end();++i)
 		{
-			ReturnValue+="<"+keys.value(i)+">";
-			QString tmp= _toHTMLTegsFormat(Map.value(keys.value(i)).toMap());
-			if(tmp.isEmpty()) ReturnValue+=VariantToString(Map.value(keys.value(i)));
-			else ReturnValue+=tmp;
-			ReturnValue+="</"+keys.value(i)+">";
-			i++;
+            ReturnValue+="<"+i.key()+">";
+            if(i.value().type() == QVariant::Map){
+            QString tmp= _toHTMLTegsFormat(i.value().toMap());
+            ReturnValue+=tmp;}
+            else ReturnValue+=VariantToString(i.value());
+            ReturnValue+="</"+i.key()+">";
 		}
 		return ReturnValue;
 	}
 	QString RecursionArray::_toYUMFormat(RecursionArray Map,QString Tabulator)
 	{
 		QString ReturnValue;
-		int i=0;
-		QList<QString> keys=Map.keys();
-		while(i<keys.size())
+        for(auto i = Map.begin();i!=Map.end();++i)
 		{
-			ReturnValue+="\n"+Tabulator+keys.value(i)+":";
-			QString tmp= _toYUMFormat(Map.value(keys.value(i)).toMap(),Tabulator+" ");
-			if(tmp.isEmpty()) ReturnValue+=VariantToString(Map.value(keys.value(i)));
+            ReturnValue+="\n"+Tabulator+i.key()+":";
+            QString tmp= _toYUMFormat(i.value().toMap(),Tabulator+" ");
+            if(tmp.isEmpty()) ReturnValue+=VariantToString(i.value());
 			else ReturnValue+=tmp;
-			i++;
 		}
 		return ReturnValue;
 	}
+    QString RecursionArray::_toArcanFormat(RecursionArray Map)
+    {
+        QString ReturnValue;
+        for(auto i = Map.begin();i!=Map.end();++i)
+        {
+            ReturnValue+=QString(i.key()).replace("[","/[").replace("]","/]")+"[";
+            if(i.value().type()==QVariant::Map)
+            ReturnValue+=_toArcanFormat(i.value().toMap())+"]";
+            else
+            ReturnValue+=VariantToString(i.value()).replace("[","/[").replace("]","/]")+"]";
+        }
+        return ReturnValue;
+    }
     QString RecursionArray::_toCFGFormat(RecursionArray Map)
     {
         bool isStart=true;
 		QString ReturnValue;
-		int i=0;
-		QList<QString> keys=Map.keys();
-		while(i<keys.size())
+        for(auto i = Map.begin();i!=Map.end();i++)
 		{
 			QString TypeValue;
-			QVariant Value=Map.value(keys.value(i));
+            QVariant Value=i.value();
 			if(Value.type()==QVariant::String) TypeValue="S";
 			else if(Value.type()==QVariant::Int) TypeValue="I";
             else if(Value.type()==QVariant::Double) TypeValue="D";
 			else if(Value.type()==QVariant::Bool) TypeValue="B";
             else if(Value.type()==QVariant::Map)
             {
-                QString tmp= _toCFGFormat(Map.value(keys.value(i)).toMap());
+                QString tmp= _toCFGFormat(Value.toMap());
                 if(!tmp.isEmpty()){
-                ReturnValue+="\n"+keys.value(i)+" {\n"+tmp+"\n}";
+                ReturnValue+="\n"+i.key()+" {\n"+tmp+"\n}";
                 }
-                i++;
                 continue;
             }
 			else
 			{
-				i++;
 				continue;
             }
-            if(!isStart)ReturnValue+="\n"+TypeValue+":"+keys.value(i)+"=";
-            else ReturnValue+=TypeValue+":"+keys.value(i)+"=";
-            ReturnValue+=VariantToString(Map.value(keys.value(i)));
-			i++;
+            if(!isStart)ReturnValue+="\n"+TypeValue+":"+i.key()+"=";
+            else ReturnValue+=TypeValue+":"+i.key()+"=";
+            ReturnValue+=VariantToString(i.value());
             if(isStart) isStart=false;
 		}
 		return ReturnValue;
@@ -608,36 +612,41 @@ namespace ACore
     QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value)
 	{
 		QMap<QString,QVariant> ReturnValue; //Возвращаемый массив
-		int i=0;
+        int i=0;
+        QString NameValue;
+        QString sValue;
 		while(i<value.size()) //Главный цикл
-		{
+        {
 			int iMin=value.indexOf("<",i); //Поиск символа <
 			if(iMin<0) break;
 			int iMax=value.indexOf(">",iMin); //Поиск символа >
 			if(iMax<0) break;
-			QString NameValue;//Имя переменной
-			NameValue=value.mid(iMin+1,iMax-iMin-1);
-			int nextiMin=value.indexOf("<"+NameValue+">",iMax); //Поиск <ИмяПеременной>
-			int nMax=value.indexOf("</"+NameValue+">",iMax); //Поиск закрывающего тега
-			if(nextiMin!=-1) if(nextiMin<nMax) //Если существует еще по крайней мере один <ИмяПеременной>
-			{
-				int numNextiMin=0; //Колличество включений <ИмяПеременной>
+            //Имя переменной
+            NameValue=value.mid(iMin+1,iMax-iMin-1);
+            int nMax=value.indexOf("</"+NameValue+">",iMax); //Поиск закрывающего тега
+            if(nMax==-1) //Если nMax невалидный
+            {
+                i=iMax+(iMax-iMin);
+                continue;
+            }
+            sValue=value.mid(iMax+1,nMax-iMax-1);
+            int nextiMin=sValue.indexOf("<"+NameValue+">"); //Поиск <ИмяПеременной>
+            if(nextiMin!=-1){//Если существует еще по крайней мере один <ИмяПеременной>
+                int numNextiMin=0; //Колличество включений <ИмяПеременной>
 				while(nextiMin!=-1 && nextiMin<nMax) //Получаю колличество включений
-				{nextiMin=value.indexOf("<"+NameValue+">",nextiMin+1);
-					numNextiMin+=1; }
+                {nextiMin=sValue.indexOf("<"+NameValue+">",nextiMin+(iMax-iMin));
+                    numNextiMin+=1; }
+                nextiMin=nextiMin+iMax;
 				while(numNextiMin!=0) //Использую колличество включений для определения последнего закрывающего тега
-				{nMax=value.indexOf("</"+NameValue+">",nMax+1);
+                {nMax=value.indexOf("</"+NameValue+">",nMax+(iMax-iMin));
 					numNextiMin-=1;}
-			}
+                sValue=value.mid(iMax+1,nMax-iMax-1);
+            }
 			if(nMax<0) //Если nMax невалидный
 			{
 				i=iMax+2;
 			}
-			else {
-				QString sValue; //Значение переменной
-				sValue=value.mid(iMax+1,nMax-iMax-1);
                 QMap<QString,QVariant> temp=_fromHTMLTegsFormat(sValue); //Рекурсия
-
 				if(sValue.isEmpty() || NameValue.isEmpty()) {
 					int tmp=iMax-iMin;
 					i=nMax+tmp;
@@ -648,9 +657,68 @@ namespace ACore
                 ReturnValue[NameValue]=temp;
 				int tmp=iMax-iMin; //Переход к следующему
 				i=nMax+tmp;}
-		}
 		return ReturnValue; //Возврат готового Map
 	}
+    QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QString value)
+    {
+        if(value.isEmpty()) return RecursionArray();
+        QMap<QString,QVariant> ReturnValue; //Возвращаемый массив
+        int i=0;
+
+        while(i<value.size()) //Главный цикл
+        {
+            QString NameValue;
+            QString sValue;
+            int iMin,iMax;
+            bool isNameReplace=false,isValueReplace=false;
+            iMin=value.indexOf("[",i); //Поиск символа [
+            if(iMin<0) break;
+            if(iMin>0)
+            if(value[iMin-1]=='\\')
+            {
+                while(value[iMin-1]=='\\'){
+                    iMin=value.indexOf("[",iMin+1); //Поиск символа [
+                    if(iMin<0) break;
+                    isNameReplace=true;
+                }
+            }
+            iMax=value.indexOf("]",iMin); //Поиск символа ]
+            if(iMax<0) break;
+            if(value[iMax-1]=='\\')
+            {
+                while(value[iMax-1]=='\\'){
+                    iMax=value.indexOf("]",iMax+1); //Поиск символа ]
+                    if(iMax<0) break;
+                    isValueReplace=true;
+                }
+            }
+            NameValue=value.mid(i,iMin-i);
+            if(isNameReplace)
+                NameValue.replace("\\[","[").replace("\\]","]");
+            sValue=value.mid(iMin+1,iMax-iMin-1);
+            if(isValueReplace)
+                sValue.replace("\\[","[").replace("\\]","]");
+            int nextiMin=sValue.indexOf("["); //Поиск [
+            if(nextiMin!=-1){//Если существует еще по крайней мере один [
+                int numNextiMin=0; //Колличество включений
+                while(nextiMin!=-1 && nextiMin<iMax) //Получаю колличество включений
+                {nextiMin=sValue.indexOf("[",nextiMin+1);
+                    numNextiMin+=1; }
+                nextiMin=nextiMin+iMax;
+                while(numNextiMin!=-1) //Использую колличество включений для определения последнего закрывающего тега
+                {iMax=value.indexOf("]",iMax+1);
+                    numNextiMin-=1;}
+                sValue=value.mid(iMin+1,iMax-iMin);
+                QMap<QString,QVariant> temp=_fromArcanFromat(sValue); //Рекурсия
+                ReturnValue[NameValue]=temp;
+                i=iMax+2;
+                continue;
+            }
+            ReturnValue[NameValue]=sValue;
+            i=iMax+1;
+        }
+        return ReturnValue; //Возврат готового Map
+    }
     QString RecursionArray::toHtml()
 	{
 		return _toHTMLTegsFormat(*this);
@@ -658,6 +726,10 @@ namespace ACore
     void RecursionArray::fromHtml(const QString value)
     {
         operator=(_fromHTMLTegsFormat(value));
+    }
+    void RecursionArray::fromArcan(const QString value)
+    {
+        operator=(_fromArcanFromat(value));
     }
     void RecursionArray::fromPost(QString post)
     {
@@ -671,6 +743,42 @@ namespace ACore
     {
         operator=(_fromYumFormat(yum));
     }
+    void ATester::RecursionArrayTest(RecursionArray STR)
+    {
+        qDebug() << "START";
+        QTime testtime;
+        testtime.start();
+        ACore::RecursionArray arrd = STR;
+        qDebug() << "fromHtml: " << testtime.elapsed();
+        testtime.start();
+        QString pas = arrd.print();
+        qDebug() << "print: " << testtime.elapsed();
+        testtime.start();
+        QString pas2 = arrd.toHtml();
+        qDebug() << "toHtml: " << testtime.elapsed();
+        testtime.start();
+        QString pas4 = arrd.toYum();
+        qDebug() << "toYum: " << testtime.elapsed();
+        testtime.start();
+        QString pas3 = arrd.toCfg();
+        qDebug() << "toCfg: " << testtime.elapsed();
+        testtime.start();
+        QString pas5 = arrd.toArcan();
+        qDebug() << "toLionF: " << testtime.elapsed();
+        testtime.start();
+        ACore::RecursionArray arrd2; arrd2.fromCfg(pas3);
+        qDebug() << "fromCfg: " << testtime.elapsed();
+        testtime.start();
+        ACore::RecursionArray arrd3; arrd3.fromYum(pas4);
+        qDebug() << "fromYum: " << testtime.elapsed();
+        testtime.start();
+        ACore::RecursionArray arrd4; arrd4.fromHtml(pas2);
+        qDebug() << "fromHTML: " << testtime.elapsed();
+        testtime.start();
+        ACore::RecursionArray arrd5; arrd5.fromArcan(pas5);
+        qDebug() << "fromLionF: " << testtime.elapsed();
+    }
+
     void AArguments::load(QStringList args)
     {
         for(int i=0;i<args.size();i++)
@@ -694,6 +802,10 @@ namespace ACore
 	{
 		return _toYUMFormat(*this);
 	}
+    QString RecursionArray::toArcan()
+    {
+        return _toArcanFormat(*this);
+    }
     QString RecursionArray::toCfg()
 	{
 		return _toCFGFormat(*this);
