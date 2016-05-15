@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QString>
 #include <QList>
+#include <QLinkedList>
 #include <QMap>
 #include <QFile>
 //#include <QtWidgets/QMessageBox>
@@ -97,7 +98,7 @@ namespace ACore
         QString toArcan();
 		QString print();
 	};
-    class ALog : public QObject, public QStringList
+    class ALog : public QObject, public QLinkedList<QString>
 	{
         Q_OBJECT
 	public:
@@ -130,10 +131,13 @@ namespace ACore
 	public:
 		ASettings(QString patch,ArrayFormates format);
 		ASettings();
+        ~ASettings();
 		void setPatch(QString patch,ArrayFormates format);
 		void LoadSettings();
 		void SaveSettings();
+        void setAutoSave(bool on);
 	protected:
+        bool isAutoSave;
 		QString file;
 		ArrayFormates FileFormat;
 	};

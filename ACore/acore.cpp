@@ -235,9 +235,9 @@ namespace ACore
 		QFile logging;
 		logging.setFileName(patch);
 		logging.open(QIODevice::Append);
-		for(int i=0;i<size();i++)
+        for(auto &i : *this)
 		{
-			QString m=value(i)+"\n";
+            QString m=i+"\n";
 			logging.write(m.toLocal8Bit());
 		}
 		logging.close();
@@ -246,18 +246,18 @@ namespace ACore
 	QString ALog::toString()
 	{
 		QString result;
-		for(int i=0;i<size();i++)
+        for(auto &i : *this)
 		{
-			result+=value(i)+"\n";
+            result+=i+"\n";
 		}
 		return result;
 	}
 	QString ALog::toHTML()
 	{
 		QString result;
-		for(int i=0;i<size();i++)
+        for(auto &i : *this)
 		{
-			result+=value(i)+"<br>";
+            result+=i+"<br>";
 		}
 		return result;
 	}
@@ -288,13 +288,23 @@ namespace ACore
 	{
 		file=patch;
 		FileFormat=format;
+        isAutoSave=false;
 	}
 
 	ASettings::ASettings()
 	{
         file = "this.cfg";
+        isAutoSave=false;
 	}
-
+    ASettings::~ASettings()
+    {
+        if(isAutoSave)
+            SaveSettings();
+    }
+    void ASettings::setAutoSave(bool on)
+    {
+        isAutoSave=on;
+    }
 	void ASettings::setPatch(QString patch,ArrayFormates format)
 	{
 		file=patch;
@@ -305,6 +315,13 @@ namespace ACore
 		QFile stream;
 		stream.setFileName(file);
 		stream.open(QIODevice::ReadOnly);
+        if(stream.error()!=QFile::NoError)
+        {
+            qDebug() << "[FILE] File not open. SaveSettings...";
+            SaveSettings();
+            qDebug() << "[FILE] Settings saved";
+            return;
+        }
         if(stream.bytesAvailable()<=0)
         {
             stream.close();
@@ -338,6 +355,8 @@ namespace ACore
 		QFile stream;
 		stream.setFileName(file);
 		stream.open(QIODevice::WriteOnly);
+        if(stream.error()!=QFile::NoError)
+            return;
 		switch(FileFormat)
 		{
 		case CfgFormat:
@@ -396,11 +415,11 @@ namespace ACore
         QString ReturnValue;
         for(auto i = Map.begin();i!=Map.end();++i)
         {
-            ReturnValue+=QString(i.key()).replace("[","/[").replace("]","/]")+"[";
+            ReturnValue+=QString(i.key()).replace("[","\\[").replace("]","\\]")+"[";
             if(i.value().type()==QVariant::Map)
             ReturnValue+=_toArcanFormat(i.value().toMap())+"]";
             else
-            ReturnValue+=VariantToString(i.value()).replace("[","/[").replace("]","/]")+"]";
+            ReturnValue+=VariantToString(i.value()).replace("[","\\[").replace("]","\\]")+"]";
         }
         return ReturnValue;
     }
@@ -455,7 +474,7 @@ namespace ACore
 		int i=0;
 		QList<QString> keys=Map.keys();
 		if(keys.size()<=0) return "";
-		ReturnValue+=Tabulator+"QMap("+NameMap+")\n"+Tabulator+"{\n";
+        ReturnValue+=Tabulator+"QMap("+NameMap+")\n"+Tabulator+"{\n";
 		while(i<keys.size())
 		{
 			QString NameKey=keys.value(i);
@@ -743,12 +762,11 @@ namespace ACore
     {
         operator=(_fromYumFormat(yum));
     }
-    void ATester::RecursionArrayTest(RecursionArray STR)
+    void ATester::RecursionArrayTest(RecursionArray arrd)
     {
         qDebug() << "START";
         QTime testtime;
         testtime.start();
-        ACore::RecursionArray arrd = STR;
         qDebug() << "fromHtml: " << testtime.elapsed();
         testtime.start();
         QString pas = arrd.print();
@@ -764,7 +782,7 @@ namespace ACore
         qDebug() << "toCfg: " << testtime.elapsed();
         testtime.start();
         QString pas5 = arrd.toArcan();
-        qDebug() << "toLionF: " << testtime.elapsed();
+        qDebug() << "toArcan: " << testtime.elapsed();
         testtime.start();
         ACore::RecursionArray arrd2; arrd2.fromCfg(pas3);
         qDebug() << "fromCfg: " << testtime.elapsed();
@@ -776,7 +794,7 @@ namespace ACore
         qDebug() << "fromHTML: " << testtime.elapsed();
         testtime.start();
         ACore::RecursionArray arrd5; arrd5.fromArcan(pas5);
-        qDebug() << "fromLionF: " << testtime.elapsed();
+        qDebug() << "fromArcan: " << testtime.elapsed();
     }
 
     void AArguments::load(QStringList args)

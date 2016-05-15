@@ -7,7 +7,7 @@ namespace ACore
     class ATester
     {
     public:
-        void RecursionArrayTest(ACore::RecursionArray STR);
+        void RecursionArrayTest(ACore::RecursionArray arrd);
     };
 }
 #endif // ATESTS
