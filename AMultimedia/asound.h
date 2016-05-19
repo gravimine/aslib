@@ -27,6 +27,7 @@ public:
   ~ASound();
   void SetPatch(QString file);
   void start(SoundAPI soundapi);
+  void stop();
   void open();
   void ForDevice(QString devicename);
   void SetFormat(int SampleRate,int bitterit,int canals,QString codec,QAudioFormat::Endian ByteOrder,QAudioFormat::SampleType SampleType);

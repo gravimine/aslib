@@ -174,9 +174,14 @@ void validClient::DeleteMe()
 }
 void ATCPServer::CloseClient(validClient *clientID)
 {
-    validClient* n = clientID;
-    if(n->state != WaitCliseInClient)
-    n->socket->close();
+    clientID->numUsingCommands--;
+    if(clientID->state != WaitCliseInClient && clientID->socket->state() != QTcpSocket::ClosingState){
+    clientID->socket->close();}
+
+    if(clientID->state == WaitCliseInClient && clientID->numUsingCommands <= 0)
+    {
+        clientID->DeleteMe();
+    }
 }
 ServerThread::ServerThread(ATCPServer *serv)
 {

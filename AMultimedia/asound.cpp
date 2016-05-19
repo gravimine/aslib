@@ -6,11 +6,13 @@ namespace AMultimedia
 {
 ASound::ASound()
 {
+    audiotest = 0;
     info = QAudioDeviceInfo::defaultOutputDevice();
 }
 ASound::~ASound()
 {
-    if(audiotest) delete audiotest;
+    if(audiotest!=0) delete audiotest;
+    if(inputFile.isOpen()) inputFile.close();
 }
 void ASound::SetPatch(QString file)
 {
@@ -26,6 +28,12 @@ void ASound::start(SoundAPI soundapi)
         QSound::play(patch);
     }
 }
+void ASound::stop()
+{
+    if(audiotest!=0) audiotest->stop();
+    if(inputFile.isOpen()) inputFile.close();
+}
+
 void ASound::SetFormat(int SampleRate,int bitterit,int canals,QString codec,QAudioFormat::Endian ByteOrder,QAudioFormat::SampleType SampleType)
 {
     audioformat.setChannelCount(canals);

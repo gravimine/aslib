@@ -5,7 +5,7 @@
 namespace ACore
 {
 float GetOstatok(float x,float k);
-double GradusToRadian(double grad);
+inline double GradusToRadian(double grad);
 }
 #endif // AMATH
 
