@@ -1,5 +1,9 @@
 #include "aalgoritm.h"
 #include <QString>
+#include <QTime>
+#include <QDate>
+namespace ACore
+{
 QString QtHtmlRecoder(QString html)
 {
     QString result;
@@ -31,4 +35,13 @@ QString html_find_s(QString htmlcode,QString html, int start)
     iMax=htmlcode.indexOf(sMax,iMin);
     for(int i=iMin;i<iMax;i++) result+=htmlcode[i];
     return result;
+}
+QString dtime()
+{
+    QTime time=QTime::currentTime();
+    QDate date=QDate::currentDate();
+    QString datatime;
+    datatime.sprintf("[%d.%d.%d][%d:%d:%d][%d]",date.day(),date.month(),date.year(),time.hour(),time.minute(),time.second(),time.msec());
+    return datatime;
+}
 }

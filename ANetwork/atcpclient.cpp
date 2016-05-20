@@ -26,7 +26,6 @@ void ATCPClient::connectToHost(QString Host,int port)
 }
 void ATCPClient::slotConected()
 {
-    qDebug() << "Connected";
     signalConnected();
 }
 void ATCPClient::slotError(QAbstractSocket::SocketError err)
@@ -40,12 +39,10 @@ void ATCPClient::slotError(QAbstractSocket::SocketError err)
                          "The connection was refused." :
                          QString(socket->errorString())
                         );
-    qDebug() << "Network Error:"+strError;
     signalError(strError);
 }
 void ATCPClient::slotReadyRead()
 {
-    qDebug() << "slotReadyRead";
     QString data=QString::fromUtf8( socket->readAll() );
     signalRead(data);
 }

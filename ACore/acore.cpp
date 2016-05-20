@@ -43,14 +43,7 @@ namespace ACore
 		return ReturnValue;
 	}
 
-	QString dtime()
-	{
-		QTime time=QTime::currentTime();
-		QDate date=QDate::currentDate();
-		QString datatime;
-		datatime.sprintf("[%d.%d.%d][%d:%d:%d][%d]",date.day(),date.month(),date.year(),time.hour(),time.minute(),time.second(),time.msec());
-		return datatime;
-	}
+
 	QString timeEx(QTime starture)
 	{
 		QTime time=QTime::currentTime();
@@ -136,7 +129,7 @@ namespace ACore
         unsigned int amin=GetOstatok(tmp,60);
         unsigned int asec=GetOstatok(our,60);
         QTime timed; QDate date;
-        unsigned int sec,min,hour,days;
+        unsigned int sec=0,min=0,hour=0,days=0;
         if(ahour/24>0) days=ahour/24;
         if(GetOstatok(ahour,24)>0) hour=GetOstatok(ahour,24);
         if(amin>0) min=amin;
@@ -166,168 +159,6 @@ namespace ACore
     inline double GradusToRadian(double grad)
 	{
 		return grad*M_PI/180;
-	}
-    void ALog::setcoutdebug(bool i)
-    {
-        isDebug=i;
-    }
-    ALog::ALog()
-    {
-        isDebug=false;
-    }
-    ALog::~ALog()
-    {
-    }
-    void ALog::savelog()
-	{
-		QFile logging;
-		logging.setFileName(patch);
-		logging.open(QIODevice::Append);
-        for(auto &i : *this)
-		{
-            QString m=i+"\n";
-			logging.write(m.toLocal8Bit());
-		}
-		logging.close();
-		clear();
-	}
-	QString ALog::toString()
-	{
-		QString result;
-        for(auto &i : *this)
-		{
-            result+=i+"\n";
-		}
-		return result;
-	}
-	QString ALog::toHTML()
-	{
-		QString result;
-        for(auto &i : *this)
-		{
-            result+=i+"<br>";
-		}
-		return result;
-	}
-	void ALog::operator <<(QString h)
-	{
-		append(dtime()+h);
-        if(isDebug) qDebug() << dtime()+h;
-        AddLog();
-	}
-	void ALog::addInfo(QString h)
-	{
-		append("[info]"+dtime()+h);
-        if(isDebug) qDebug() << "[info]"+dtime()+h;
-        AddLog();
-	}
-	void ALog::addError(QString h)
-	{
-		append("[error]"+dtime()+h);
-        if(isDebug) qDebug() << "[error]"+dtime()+h;
-        AddLog();
-	}
-    void ALog::setfile(QString data)
-	{
-		patch=data;
-	}
-
-	ASettings::ASettings(QString patch,ArrayFormates format)
-	{
-		file=patch;
-		FileFormat=format;
-        isAutoSave=false;
-	}
-
-	ASettings::ASettings()
-	{
-        file = "this.cfg";
-        isAutoSave=false;
-	}
-    ASettings::~ASettings()
-    {
-        if(isAutoSave)
-            SaveSettings();
-    }
-    void ASettings::setAutoSave(bool on)
-    {
-        isAutoSave=on;
-    }
-	void ASettings::setPatch(QString patch,ArrayFormates format)
-	{
-		file=patch;
-		FileFormat=format;
-	}
-	void ASettings::LoadSettings()
-	{
-		QFile stream;
-		stream.setFileName(file);
-		stream.open(QIODevice::ReadOnly);
-        if(stream.error()!=QFile::NoError)
-        {
-            qDebug() << "[FILE] File not open. SaveSettings...";
-            SaveSettings();
-            qDebug() << "[FILE] Settings saved";
-            return;
-        }
-        if(stream.bytesAvailable()<=0)
-        {
-            stream.close();
-        }
-		switch(FileFormat)
-		{
-		case CfgFormat:
-			{
-                fromCfg(stream.readAll());
-				break;
-			}
-		case YumFormat:
-			{
-                fromYum(stream.readAll());
-				break;
-			}
-        case PostGetFormat:
-            {
-                break;
-            }
-        case StdHTMLTagesFormat:
-            {
-                fromHtml(stream.readAll());
-                break;
-            }
-		}
-        stream.close();
-	}
-	void ASettings::SaveSettings()
-	{
-		QFile stream;
-		stream.setFileName(file);
-		stream.open(QIODevice::WriteOnly);
-        if(stream.error()!=QFile::NoError)
-            return;
-		switch(FileFormat)
-		{
-		case CfgFormat:
-			{
-                stream.write(toCfg().toLocal8Bit());
-				break;
-			}
-		case YumFormat:
-			{
-                stream.write(toYum().toLocal8Bit());
-				break;
-			}
-        case PostGetFormat:
-            {
-                stream.write(toPost().toLocal8Bit());
-                break;
-            }
-        case StdHTMLTagesFormat:
-            {
-                stream.write(toHtml().toLocal8Bit());
-                break;
-            }
-		}
 	}
 
     void ATester::RecursionArrayTest(RecursionArray arrd)

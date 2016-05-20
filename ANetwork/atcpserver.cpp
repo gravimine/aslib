@@ -39,7 +39,6 @@ bool ATCPServer::launch(QHostAddress host, int port)
         return false;
     }
     else {
-        qDebug() << "Server started";
         //Создание потоков
         for(int i=0;i<MinThread;i++)
         {
@@ -231,7 +230,6 @@ void ServerThread::UseCommand()
         server->ClientsList.erase(mClientID);
         delete nClient ;
         server->mutex.unlock();
-
         qDebug() << "Client disconnect END";
     }
 }
