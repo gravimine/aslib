@@ -8,6 +8,7 @@
 #include <QMutex>
 #include <QLinkedList>
 #include <QTimer>
+#include <functional>
 enum ClientState
 {
     UncorrenctState,
@@ -87,18 +88,13 @@ public:
     QLinkedList<validClient*>::iterator GetIDClient(QTcpSocket* socket);
     virtual void UseCommand(QByteArray sCommand, validClient* nClient,ServerThread* thisThread)
     {
-        Q_UNUSED(sCommand);
-        Q_UNUSED(nClient);
-        Q_UNUSED(thisThread);
-    }
-    virtual validClient* NewValidClient()
-    {
-        validClient* result = new validClient();
-        return result;
+        qDebug() << sCommand+" from "+nClient->socket->peerAddress().toString()+":"+
+                    QString::number(nClient->socket->peerPort())+" thread "+thisThread->currentIdThread;
     }
     QTcpServer* serverd;
     QList<QTcpServer*> addonServer;
     int MinThread,MaxThread;
+    std::function<validClient*()> NewValidClient;
 signals:
     void signalCommand(int idThread);
     void signalClientConnected(validClient* user);

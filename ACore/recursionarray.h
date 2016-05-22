@@ -12,7 +12,7 @@ namespace ACore
 {
 QString DeleteQuotes(QString str);
 QString DeleteSpaceStart(QString str);
-enum ArrayFormates
+enum ArrayFormates : unsigned int
 {
     StdHTMLTagesFormat,
     YumFormat,

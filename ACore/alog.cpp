@@ -17,10 +17,11 @@ void ALog::savelog()
     QFile logging;
     logging.setFileName(patch);
     logging.open(QIODevice::Append);
+    char chr = 10;
     for(auto &i : *this)
     {
-        QString m=i+"\n";
-        logging.write(m.toLocal8Bit());
+        logging.write(i);
+        logging.write(&chr);
     }
     logging.close();
     clear();
@@ -28,6 +29,15 @@ void ALog::savelog()
 QString ALog::toString()
 {
     QString result;
+    for(auto &i : *this)
+    {
+        result+=QString::fromUtf8(i)+"\n";
+    }
+    return result;
+}
+QByteArray ALog::toByteArray()
+{
+    QByteArray result;
     for(auto &i : *this)
     {
         result+=i+"\n";
@@ -39,25 +49,25 @@ QString ALog::toHTML()
     QString result;
     for(auto &i : *this)
     {
-        result+=i+"<br>";
+        result+=QString::fromUtf8(i)+"<br>";
     }
     return result;
 }
 void ALog::operator <<(QString h)
 {
-    append(dtime()+h);
+    append((dtime()+h).toUtf8());
     if(isDebug) qDebug() << dtime()+h;
     AddLog();
 }
 void ALog::addInfo(QString h)
 {
-    append("[info]"+dtime()+h);
+    append(("[info]"+dtime()+h).toUtf8());
     if(isDebug) qDebug() << "[info]"+dtime()+h;
     AddLog();
 }
 void ALog::addError(QString h)
 {
-    append("[error]"+dtime()+h);
+    append(("[error]"+dtime()+h).toUtf8());
     if(isDebug) qDebug() << "[error]"+dtime()+h;
     AddLog();
 }

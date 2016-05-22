@@ -7,12 +7,13 @@
 #include "aalgoritm.h"
 namespace ACore
 {
-class ALog : public QObject, public QLinkedList<QString>
+class ALog : public QObject, public QLinkedList<QByteArray>
 {
     Q_OBJECT
 public:
     void savelog();
     QString toString();
+    QByteArray toByteArray();
     QString toHTML();
     void setcoutdebug(bool i);
     void operator <<(QString h);

@@ -3,7 +3,8 @@ SOURCES += $$PWD/acore.cpp \
     $$PWD/abbcodec.cpp \
     $$PWD/recursionarray.cpp \
     $$PWD/asettings.cpp \
-    $$PWD/alog.cpp
+    $$PWD/alog.cpp \
+    $$PWD/avariant.cpp
 INCLUDEPATH += $$PWD
 HEADERS  += $$PWD/acore.h \
     $$PWD/amath.h \
@@ -13,4 +14,5 @@ HEADERS  += $$PWD/acore.h \
     $$PWD/recursionarray.h \
     $$PWD/abstractstruct.h \
     $$PWD/asettings.h \
-    $$PWD/alog.h
+    $$PWD/alog.h \
+    $$PWD/avariant.h
