@@ -17,6 +17,7 @@ enum ArrayFormates : unsigned int
     StdHTMLTagesFormat,
     YumFormat,
     PostGetFormat,
+    ArcanFormat,
     CfgFormat
 };
 struct RecVal
@@ -29,7 +30,7 @@ class RecursionArray : public QMap<QString,QVariant>
 private:
     QString _toHTMLTegsFormat(const RecursionArray Map);
     QString _toYUMFormat(const RecursionArray Map, QString Tabulator="");
-    QString _toCFGFormat(const RecursionArray Map);
+    QByteArray _toCFGFormat(const RecursionArray Map);
     QString _toArcanFormat(const RecursionArray Map);
     QMap<QString,QVariant> _fromYumFormat(const QString yum, QString level="", bool isReturn=false);
     QMap<QString,QVariant> _fromCfgFormat(const QString yum, bool isReturn=false);
@@ -52,7 +53,7 @@ public:
     void fromArcan(const QString value);
     QString toHtml();
     QString toYum();
-    QString toCfg();
+    QByteArray toCfg();
     QString toPost();
     QString toArcan();
     QString print();

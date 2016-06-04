@@ -175,7 +175,7 @@ void ATCPServer::CloseClient(validClient *clientID)
 {
     clientID->numUsingCommands--;
     if(clientID->state != WaitCliseInClient && clientID->socket->state() != QTcpSocket::ClosingState){
-    clientID->socket->close();}
+    clientID->socket->disconnectFromHost();}
 
     if(clientID->state == WaitCliseInClient && clientID->numUsingCommands <= 0)
     {

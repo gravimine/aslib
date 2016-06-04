@@ -64,6 +64,11 @@ void ASettings::LoadSettings()
             fromHtml(stream.readAll());
             break;
         }
+    case ArcanFormat:
+        {
+            fromArcan(stream.readAll());
+            break;
+        }
     }
     stream.close();
 }
@@ -78,7 +83,7 @@ void ASettings::SaveSettings()
     {
     case CfgFormat:
         {
-            stream.write(toCfg().toLocal8Bit());
+            stream.write(toCfg());
             break;
         }
     case YumFormat:
@@ -94,6 +99,11 @@ void ASettings::SaveSettings()
     case StdHTMLTagesFormat:
         {
             stream.write(toHtml().toLocal8Bit());
+            break;
+        }
+    case ArcanFormat:
+        {
+            stream.write(toArcan().toLocal8Bit());
             break;
         }
     }

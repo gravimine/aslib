@@ -94,7 +94,10 @@ public:
     QTcpServer* serverd;
     QList<QTcpServer*> addonServer;
     int MinThread,MaxThread;
-    std::function<validClient*()> NewValidClient;
+    validClient* NewValidClient()
+    {
+        return new validClient();
+    }
 signals:
     void signalCommand(int idThread);
     void signalClientConnected(validClient* user);

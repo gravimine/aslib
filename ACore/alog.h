@@ -13,6 +13,7 @@ class ALog : public QObject, public QLinkedList<QByteArray>
 public:
     void savelog();
     QString toString();
+    QString toString(int start, int endd);
     QByteArray toByteArray();
     QString toHTML();
     void setcoutdebug(bool i);

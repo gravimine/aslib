@@ -9,6 +9,7 @@ ATCPClient::ATCPClient()
     m_nNextBlockSize = 0;
     connect(socket, SIGNAL(connected()), SLOT(slotConected()));
     connect(socket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
+    connect(socket, SIGNAL(disconnected()), SLOT(slotDisconnect()));
 
 }
 void ATCPClient::slotDisconnect()

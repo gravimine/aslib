@@ -1,4 +1,5 @@
 #include "recursionarray.h"
+#include <QTextStream>
 using namespace ACore;
 RecursionArray::RecursionArray()
 {
@@ -7,9 +8,9 @@ RecursionArray::RecursionArray()
 
 RecursionArray::RecursionArray(std::initializer_list<RecVal> list)
 {
-    for(auto &i : list)
+    for(auto i=list.begin();i!=list.end();++i)
     {
-        this->operator [](i.name) = i.val;
+        this->operator []((*i).name) = (*i).val;
     }
 }
 QString ACore::DeleteQuotes(QString str)
@@ -115,10 +116,10 @@ QString RecursionArray::_toArcanFormat(RecursionArray Map)
     }
     return ReturnValue;
 }
-QString RecursionArray::_toCFGFormat(RecursionArray Map)
+QByteArray RecursionArray::_toCFGFormat(RecursionArray Map)
 {
     bool isStart=true;
-    QString ReturnValue;
+    QByteArray ReturnValue;
     for(auto i = Map.begin();i!=Map.end();i++)
     {
         QString TypeValue;
@@ -129,9 +130,9 @@ QString RecursionArray::_toCFGFormat(RecursionArray Map)
         else if(Value.type()==QVariant::Bool) TypeValue="B";
         else if(Value.type()==QVariant::Map)
         {
-            QString tmp= _toCFGFormat(Value.toMap());
+            QByteArray tmp= _toCFGFormat(Value.toMap());
             if(!tmp.isEmpty()){
-            ReturnValue+="\n"+i.key()+" {\n"+tmp+"\n}";
+            ReturnValue.append('\n').append(i.key().toUtf8()).append(" {\n").append(tmp).append("\n}");
             }
             continue;
         }
@@ -139,9 +140,9 @@ QString RecursionArray::_toCFGFormat(RecursionArray Map)
         {
             continue;
         }
-        if(!isStart)ReturnValue+="\n"+TypeValue+":"+i.key()+"=";
-        else ReturnValue+=TypeValue+":"+i.key()+"=";
-        ReturnValue+=VariantToString(i.value());
+        if(!isStart)ReturnValue.append('\n').append(TypeValue.toUtf8()).append(':').append(i.key().toUtf8()).append('=');
+        else ReturnValue.append(TypeValue).append(":").append(i.key()).append("=");
+        ReturnValue.append(VariantToString(i.value()).toUtf8());
         if(isStart) isStart=false;
     }
     return ReturnValue;
@@ -263,7 +264,7 @@ QMap<QString,QVariant> RecursionArray::_fromCfgFormat(QString yum, bool isReturn
     for(int i=0;i<fromBR.size();i++)
     {
         QString ValueString=fromBR.value(i);
-        ValueString=DeleteSpaceStart(ValueString);
+        ValueString=ValueString.trimmed();
         if(ValueString[0]=='#') continue;
         int position=ValueString.indexOf("=");
         if(position<=0 && ValueString.indexOf("{")<=0 && ValueString.indexOf("}")<=0) continue;
@@ -327,7 +328,7 @@ QMap<QString,QVariant> RecursionArray::_fromCfgFormat(QString yum, bool isReturn
 }
 RecursionArray::RecursionArray(QMap<QString,QVariant> h)
 {
-    QMap::operator =(h);
+    operator =(h);
 }
 QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value, bool isReturn)
 {
@@ -457,7 +458,7 @@ QString RecursionArray::toArcan()
 {
     return _toArcanFormat(*this);
 }
-QString RecursionArray::toCfg()
+QByteArray RecursionArray::toCfg()
 {
     return _toCFGFormat(*this);
 }

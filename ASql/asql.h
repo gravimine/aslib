@@ -8,6 +8,8 @@ class ASqlQuery : public QSqlQuery
 {
 public:
     void concat(QString par);
+    void concatPar(QString par);
+    bool send();
 protected:
     QString reply;
 };
