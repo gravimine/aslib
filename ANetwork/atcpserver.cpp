@@ -14,18 +14,19 @@ ATCPServer::ATCPServer()
 
 ATCPServer::~ATCPServer()
 {
+
+    for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
+    {
+        validClient* nClient = (*i);
+        delete nClient;
+        ClientsList.erase(i);
+    }
     for(int i=0;i<ThreadList.size();i++)
     {
         ServerThread* thread = ThreadList[i];
         thread->exit(0);
         thread->deleteLater();
         ThreadList.removeAt(i);
-    }
-    for(QLinkedList<validClient*>::iterator i=ClientsList.begin();i!=ClientsList.end();i++)
-    {
-        validClient* nClient = (*i);
-        delete nClient;
-        ClientsList.erase(i);
     }
     serverd->close();
     delete serverd;

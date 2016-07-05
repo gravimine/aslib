@@ -58,7 +58,7 @@ void RecursionArray::fromHtml(const QString value)
 {
     operator=(_fromHTMLTegsFormat(value));
 }
-void RecursionArray::fromArcan(const QString value)
+void RecursionArray::fromArcan(const QByteArray value)
 {
     operator=(_fromArcanFromat(value));
 }
@@ -328,7 +328,7 @@ QMap<QString,QVariant> RecursionArray::_fromCfgFormat(QString yum, bool isReturn
 }
 RecursionArray::RecursionArray(QMap<QString,QVariant> h)
 {
-    operator =(h);
+    QMap<QString,QVariant>::operator =(h);
 }
 QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value, bool isReturn)
 {
@@ -390,7 +390,7 @@ QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value, 
             i=nMax+tmp;}
     return ReturnValue; //Возврат готового Map
 }
-QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QString value)
+/*QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QString value)
 {
     if(value.isEmpty()) return RecursionArray();
     QMap<QString,QVariant> ReturnValue; //Возвращаемый массив
@@ -449,7 +449,149 @@ QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QString value)
         i=iMax+1;
     }
     return ReturnValue; //Возврат готового Map
-}
+}*/
+QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QByteArray s){
+        int i = 0;
+        int max = s.size();
+        QMap<QString,QVariant> result;
+        QByteArray name; //ДИНАМИЧНЫЙ БУФЕР НА 10(БАЙТОВ СТАРТОВЫЙ НАБОР)
+        QByteArray buffer; //ДИНАМИЧНЫЙ БУФЕР НА ХРАНЕНИЕ БАЙТОВ
+        while(i!=max){
+            int c = 0; //[ КОЛИЧЕСТВО [ + 1, ] -1 ЕСЛИ 0 ЗНАЧИТ ЗАКРЫТИЕ МАССИВА
+            bool typeIS = false; // ПРИСУТСТВИЕ ТИПИЗАЦИИ
+            bool isNameNumber = true; // ТЕКУЩЕЕ ИМЯ ИМЕЕТ ОДНИ ЛИШЬ ЦИФРЫ
+            char typeTip = 0; //ТИП ТИПИЗАЦИИ, 1 БАЙТ
+            while(i!=max){ // сборка буфера имени, "text["
+                char a = s[i];
+                i = i + 1;
+
+                if(a==64){ // СИМВОЛ @
+                    char ta = s[i]; //СЛУДУЮЩИЙ БАЙТ
+                    if(ta!=91){ //СЛУДУЮЩИЙ БАЙТ НЕ РАВЕН ОТКРЫТОМУ МАССИВУ [
+                        typeTip = ta; //ЗАПИСАТЬ
+                        typeIS = true;
+                        i = i + 1;
+                        continue;
+                    }
+                }else
+
+                if(a==92 && i!=max){
+                    char ta = s[i]; //СЛУДУЮЩИЙ БАЙТ
+                    if(ta==91 || ta==93 || ta==92 || ta==64){ //ЕСЛИ СЛЕДУЮЩИЙ БАЙТ ТРЕБУЕТ ЭКРАНИЗАЦИИ, ЭКРАНИРОВАТЬ ЕГО
+                        name.append(ta);
+                        i = i + 1;
+                        continue;
+                    }
+                }else
+
+                if(a == 91){ // [ МАССИВ ОТКРЫТ
+                    c = c + 1;
+                    if(c==1)break;
+                }
+                if(isNameNumber){
+                    if(a>57 || a<48){
+                        isNameNumber = false;
+                    }
+                }
+                name.append(a); //ЗАПИСЬ БАЙТА В БУФЕР
+            }
+            if(c==0){ //ошибка символ [ не был найден
+                return result;
+            }
+            //BUFFER
+            bool dopRascoding = false; //BOOLEAN УКАЗАЮЩИЙ ЧТО ЭТО МАССИВ
+            bool replacer = false; // INT \[
+            while(i!=max){
+                char a = s[i];
+                i = i + 1;
+
+                if(a==92){
+                    char ta = s[i]; //СЛУДУЮЩИЙ БАЙТ
+                    if(ta == 91 || ta==92 || ta==93){ //ЕСЛИ СЛЕДУЮЩИЙ БАЙТ ТРЕБУЕТ ЭКРАНИЗАЦИИ ПОМЕТИТЬ КАК ТРЕБУЕТ
+                        buffer.append(92);
+                        buffer.append(ta);
+                        replacer = true;
+                        i = i + 1;
+                        continue;
+                    }
+                }else
+
+
+                if(a==91){ //[
+                    c = c + 1;
+                    dopRascoding = true; // ЭТО МАССИВ, ПРИНЯТЬ МЕРЫ
+                }else
+
+                if(a==93){ //] СИМВОЛ ЗАКРЫТИЯ МАСИВА
+                    c = c - 1;
+                    if(c == 0){ // закрыто
+                        if(dopRascoding){ //ЭТО МАССИВ
+                            result[QString::fromUtf8(name)]=_fromHTMLTegsFormat(buffer);
+                        }else {
+                            if(replacer){
+                                QByteArray buffByte = buffer;
+                                buffer.clear();
+                                int maxB = buffByte.size();
+                                QByteArray replacerBuff;
+                                int y = 0;
+                                while(y!=maxB){
+                                    char aB = buffByte[y];
+                                    y = y + 1;
+
+                                    if(aB==92 && y!=maxB){ //поддержка экрана
+                                        char ta = s[i]; //СЛУДУЮЩИЙ БАЙТ
+                                        if(ta==91 || ta==93 || ta==92){
+                                            replacerBuff.append(ta);
+                                            y = y + 1;
+                                            continue;
+                                        }
+                                    }
+                                    replacerBuff.append(aB);
+                                }
+                                buffer.clear();
+                                buffer.append(replacerBuff);
+                                replacerBuff.clear();
+                            }
+
+                            if(typeIS==false){
+                                result[QString::fromUtf8(name)]=QString::fromUtf8(buffer);
+                            }else {
+
+                                if(typeTip==49){
+                                    if(buffer.size() == 1){ // ЕСЛИ ЗНАЧЕНИЕ ИМЕЕТ РАЗМЕР В 1 И ВНУТРИ ЗНАЧЕНИЕ 1 ТО ЭТО TRUE
+                                        result[QString::fromUtf8(name)]=true;
+                                    }else {
+                                        result[QString::fromUtf8(name)]=false;
+                                    }
+                                }else
+
+                                if(typeTip==73){
+                                    result[QString::fromUtf8(name)]=QString::fromUtf8(buffer).toInt();
+                                }else
+
+                                if(typeTip==68){
+                                    result[QString::fromUtf8(name)]=QString::fromUtf8(buffer).toDouble();
+                                }else
+
+                                if(typeTip==76){
+                                    result[QString::fromUtf8(name)]=QString::fromUtf8(buffer).toInt();
+                                }else {
+                                    result[QString::fromUtf8(name)]=false;
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                }
+
+                buffer.append(a);
+            }
+            name.clear();
+            buffer.clear();
+        }
+        return result;
+    }
 QString RecursionArray::toYum()
 {
     return _toYUMFormat(*this);

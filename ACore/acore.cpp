@@ -135,7 +135,7 @@ namespace ACore
         if(amin>0) min=amin;
         if(asec>0) sec=asec;
         timed.setHMS(hour,min,sec);
-        date.addDays(days);
+        date=date.addDays(days);
         result.setDate(date);
         result.setTime(timed);
         return result;
@@ -192,7 +192,7 @@ namespace ACore
         ACore::RecursionArray arrd4; arrd4.fromHtml(pas2);
         qDebug() << "fromHTML: " << testtime.elapsed();
         testtime.start();
-        ACore::RecursionArray arrd5; arrd5.fromArcan(pas5);
+        ACore::RecursionArray arrd5; arrd5.fromArcan(pas5.toUtf8());
         qDebug() << "fromArcan: " << testtime.elapsed();
     }
 

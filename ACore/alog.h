@@ -25,7 +25,7 @@ public:
     ~ALog();
 protected:
     QString patch;
-    bool isDebug;
+    bool isDebug,isStdCout;
 signals:
     void AddLog();
 };

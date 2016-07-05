@@ -36,7 +36,7 @@ private:
     QMap<QString,QVariant> _fromCfgFormat(const QString yum, bool isReturn=false);
     QMap<QString,QVariant> _fromHTMLTegsFormat(const QString value, bool isReturn=false);
     QMap<QString,QVariant> _fromPostGetFormat(const QString post);
-    QMap<QString,QVariant> _fromArcanFromat(const QString post);
+    QMap<QString,QVariant> _fromArcanFromat(const QByteArray s);
 public:
     static QString printList(const QList<QVariant> List);
     static QString printMap(const RecursionArray Map,const QString NameMap="",const QString Tabulator="");
@@ -50,7 +50,7 @@ public:
     void fromCfg(const QString yum);
     void fromPost(const QString post);
     void fromHtml(const QString value);
-    void fromArcan(const QString value);
+    void fromArcan(const QByteArray value);
     QString toHtml();
     QString toYum();
     QByteArray toCfg();

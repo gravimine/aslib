@@ -34,12 +34,12 @@ public:
     }
     ATCPServer* servers;
     void DeleteMe();
-    QLinkedList<validClient*>::iterator iterator;
+    QLinkedList<validClient*>::iterator iterator,iterator2;
 
     QMutex mutex;
     QTcpSocket* socket;
     ClientState state;
-    int numUsingCommands;
+    int numUsingCommands,ThreadID;
     bool isAuth;
 };
 
@@ -64,6 +64,7 @@ public:
     void UseCommand();
     QMutex arrayMutex;
     QLinkedList<ArrayCommand> ArrayCommands;
+    QLinkedList<validClient*> ClientsListt;
     ATCPServer* server;
     bool isStaticThread,isSleep;
     int currentIdThread,currentCommandID;
@@ -94,7 +95,7 @@ public:
     QTcpServer* serverd;
     QList<QTcpServer*> addonServer;
     int MinThread,MaxThread;
-    validClient* NewValidClient()
+    virtual validClient* NewValidClient()
     {
         return new validClient();
     }

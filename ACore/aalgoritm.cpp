@@ -15,6 +15,18 @@ QString QtHtmlRecoder(QString html)
     for(int i=iMin;i<iMax;i++) result+=html[i];
     return result;
 }
+void GetBytes(void* get,const int size)
+{
+    for(int j=0; j<size; j++){
+    char getup=*(((char*)(void*)get) + j);
+    bool k;
+    for(unsigned int i=0; i<sizeof(char)*8; i++) {
+    k = ((getup>>i)&1);
+    if(k) std::cout << 1;
+    else std::cout << 0;
+    }}
+    std::cout << std::endl;
+}
 QString html_find(QString htmlcode,QString sMin,QString sMax, int start)
 {
     QString result;

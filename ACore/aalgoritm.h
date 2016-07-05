@@ -2,6 +2,7 @@
 #define AALGORITM_H
 #include <QString>
 #include <QDebug>
+#include <iostream>
 #define REPLACE_TEXT_I "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
 namespace ACore
 {
@@ -22,5 +23,6 @@ class AConctructDestructTest
 QString dtime();
 QStringList splitStringArgs(QString value);
 bool isFullEmpry(QString str);
+void GetBytes(void* get,const int size);
 }
 #endif // AALGORITM_H
