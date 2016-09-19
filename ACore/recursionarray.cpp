@@ -568,6 +568,20 @@ QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QByteArray s){
                                 if(typeTip==73){
                                     result[QString::fromUtf8(name)]=QString::fromUtf8(buffer).toInt();
                                 }else
+                                    if(typeTip==84){
+                                        if(buffer.size()>4)
+                                            result[QString::fromUtf8(name)]=0;
+                                        else
+                                        {
+                                            unsigned int resu=0;
+                                            if(buffer.size()>0) resu=resu+((unsigned char)(buffer.at(0)));
+                                            if(buffer.size()>1) resu=resu+((unsigned char)(buffer.at(1)))*256;
+                                            if(buffer.size()>2) resu=resu+((unsigned char)(buffer.at(2)))*256*256;
+                                            if(buffer.size()>3) resu=resu+((unsigned char)(buffer.at(3)))*256*256*256;
+                                            result[QString::fromUtf8(name)]=*((int*)(&resu));
+                                        }
+                                    }
+                                else
 
                                 if(typeTip==68){
                                     result[QString::fromUtf8(name)]=QString::fromUtf8(buffer).toDouble();

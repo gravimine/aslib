@@ -48,7 +48,7 @@ namespace ACore
 	QString dataEx(int year,int month,int day);
 	QString dataTimeEx(int second, int minutes=0,int hour=0,int year=0,int month=0,int day=0);
     QDateTime dataTimeEx(QDateTime timedate,QDateTime datatime);
-
+    QByteArray IntToByte(int integer);
 
 }
 #endif // ACORE

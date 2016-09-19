@@ -27,6 +27,17 @@ void GetBytes(void* get,const int size)
     }}
     std::cout << std::endl;
 }
+QByteArray IntToByte(int integer)
+{
+   QByteArray result;
+   char* zen=(char*)((void*)&integer);
+   if(integer==0)result.append((char)0);
+   else result.append(*zen);
+   if(integer>255 || integer<0)result.append(*(zen+1));
+   if(integer>(256*256-1) || integer<0)result.append(*(zen+2));
+   if(integer>(256*256*256-1) || integer<0)result.append(*(zen+3));
+   return result;
+}
 QString html_find(QString htmlcode,QString sMin,QString sMax, int start)
 {
     QString result;
