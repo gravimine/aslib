@@ -22,8 +22,8 @@ struct AQuest
 struct ANetworkReply
 {
 	int Type;
-	QString TextReply;
-	QString TextError;
+    QString TextReply,errorString;
+    QNetworkReply::NetworkError error;
 };
 
 class ANetworkAccessManager : public QObject

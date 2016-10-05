@@ -19,7 +19,9 @@ void ANetworkAccessManager::getReplyFinished1(QNetworkReply*reply)
 	else
 	{
         ANetworkReply _value;
-        _value.TextError=reply->errorString();
+        _value.error=reply->error();
+        if(reply->error()!=QNetworkReply::NoError)
+            _value.errorString=reply->errorString();
         _value.TextReply=QString::fromUtf8(reply->readAll()) ;
         reply->deleteLater();
         _value.Type=Type;
@@ -37,8 +39,6 @@ void ANetworkAccessManager::getReplyFinished1(QNetworkReply*reply)
 }
 void ANetworkAccessManager::nextReqest()
 {
-
-
     if(Posts.size()>0)
     {
         isSendPost=1;
@@ -71,7 +71,7 @@ ANetworkAccessManager::~ANetworkAccessManager()
 void ANetworkAccessManager::slotTimer()
 {
     ANetworkReply _value;
-    _value.TextError="Timeout";
+    _value.error=QNetworkReply::TimeoutError;
     _value.Type=Type;
     ARequest(_value);
 }

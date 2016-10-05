@@ -56,7 +56,7 @@ QString RecursionArray::toHtml()
 }
 void RecursionArray::fromHtml(const QString value)
 {
-    operator=(_fromHTMLTegsFormat(value));
+    _fromHTMLTegsFormat(value,false);
 }
 void RecursionArray::fromArcan(const QByteArray value)
 {
@@ -367,27 +367,28 @@ QMap<QString,QVariant> RecursionArray::_fromHTMLTegsFormat(const QString value, 
         {
             i=iMax+2;
         }
-            QMap<QString,QVariant> temp=_fromHTMLTegsFormat(sValue); //Рекурсия
-            if(sValue.isEmpty() || NameValue.isEmpty()) {
-                int tmp=iMax-iMin;
-                i=nMax+tmp;
-                continue; }
-            if(temp.isEmpty()) //Если рекурсия не нашла других переменных в переменной
-            {
-                if(!isReturn)
-                    operator [](NameValue)=sValue;
-                else
-                    ReturnValue[NameValue]=sValue;
-            }
+        QMap<QString,QVariant> temp=_fromHTMLTegsFormat(sValue,true); //Рекурсия
+        if(sValue.isEmpty() || NameValue.isEmpty()) {
+            int tmp=iMax-iMin;
+            i=nMax+tmp;
+            continue; }
+        if(temp.isEmpty()) //Если рекурсия не нашла других переменных в переменной
+        {
+            if(!isReturn)
+                operator [](NameValue)=sValue;
             else
-            {
-                if(!isReturn)
-                    operator [](NameValue)=temp;
-                else
-                    ReturnValue[NameValue]=temp;
-            }
-            int tmp=iMax-iMin; //Переход к следующему
-            i=nMax+tmp;}
+                ReturnValue[NameValue]=sValue;
+        }
+        else
+        {
+            if(!isReturn)
+                operator [](NameValue)=temp;
+            else
+                ReturnValue[NameValue]=temp;
+        }
+        int tmp=iMax-iMin; //Переход к следующему
+        i=nMax+tmp;
+    }
     return ReturnValue; //Возврат готового Map
 }
 /*QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QString value)
