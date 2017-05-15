@@ -6,8 +6,8 @@ class AClusterKeys
 {
 public:
     AClusterKeys();
-    QByteArray TWE,ROK,RNO,RBAD,SQLE,ISE,NPE,BANE,KR,NFR,BAR,EVENTR;
-    QByteArray iTWE,iROK,iRNO,iRBAD,iSQLE,iISE,iNPE,iBANE,iKR,iNFR,iBAR,iEVENTR;
+    QByteArray OK,NO,BAD,ISE,NPE,ASF,R404,EVENTR;
+    QByteArray iOK,iNO,iBAD,iISE,iNPE,iASF,iR404,iEVENTR;
     ACore::RecursionArray toRecArray();
 };
 

@@ -2,19 +2,23 @@
 
 AClusterKeys::AClusterKeys()
 {
-    iROK="1";
-    iRNO="";
-    iRBAD="33";
-    iISE="40";
-    iBAR="60";
+    iOK="1";
+    iNO="";
+    iBAD="33";
     iNPE="61";
-    iBANE="62";
-    ROK=ACore::RecursionArray{{"key",iROK}}.toArcan().toUtf8();
-    RNO=ACore::RecursionArray{{"key",iRNO}}.toArcan().toUtf8();
-    RBAD=ACore::RecursionArray{{"key",iRBAD}}.toArcan().toUtf8();
-    BAR=ACore::RecursionArray{{"key",iBAR}}.toArcan().toUtf8();
-    NPE=ACore::RecursionArray{{"key",iNPE}}.toArcan().toUtf8();
+    iISE="40";
+    iASF="32";
+    iR404="50";
+    iEVENTR="2";
 
+    OK=ACore::RecursionArray{{"key",iOK}}.toArcan().toUtf8();
+    NO=ACore::RecursionArray{{"key",iNO}}.toArcan().toUtf8();
+    BAD=ACore::RecursionArray{{"key",iBAD}}.toArcan().toUtf8();
+    NPE=ACore::RecursionArray{{"key",iNPE}}.toArcan().toUtf8();
+    ISE=ACore::RecursionArray{{"key",iISE}}.toArcan().toUtf8();
+    ASF=ACore::RecursionArray{{"key",iASF}}.toArcan().toUtf8();
+    R404=ACore::RecursionArray{{"key",iR404}}.toArcan().toUtf8();
+    EVENTR=ACore::RecursionArray{{"key",iEVENTR}}.toArcan().toUtf8();
 }
 
 ACore::RecursionArray AClusterKeys::toRecArray()

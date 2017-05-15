@@ -527,7 +527,7 @@ QMap<QString,QVariant> RecursionArray::_fromArcanFromat(const QByteArray s){
                     c = c - 1;
                     if(c == 0){ // закрыто
                         if(dopRascoding){ //ЭТО МАССИВ
-                            result[QString::fromUtf8(name)]=_fromHTMLTegsFormat(buffer);
+                            result[QString::fromUtf8(name)]=_fromArcanFromat(buffer);
                         }else {
                             if(replacer){
                                 QByteArray buffByte = buffer;
